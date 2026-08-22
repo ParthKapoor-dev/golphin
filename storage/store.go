@@ -24,7 +24,7 @@ func GetDB(filePath string) (*Db, error) {
 	return &Db{file, filePath}, nil
 }
 
-func (db *Db) Get(key string) (string, error) {
+func (db *Db) Get(key string) (bool, string, error) {
 	scanner := bufio.NewScanner(db.file)
 
 	var lines []string
@@ -33,22 +33,31 @@ func (db *Db) Get(key string) (string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return "", err
+		return false, "", err
 	}
 
 	for i := len(lines) - 1; i >= 0; i-- {
 		line := lines[i]
 		kv := strings.Split(line, ":")
 		if kv[0] == key {
-			return kv[1], nil
+			if kv[1] == "\000" {
+				return false, "", nil
+			}
+
+			return true, kv[1], nil
 		}
 	}
 
-	return "", nil
+	return false, "", nil
 }
 
 func (db *Db) Upsert(key string, value string) error {
 	_, err := db.file.WriteString(key + ":" + value + "\n")
+	return err
+}
+
+func (db *Db) Delete(key string) error {
+	_, err := db.file.WriteString(key + ":" + "\000" + "\n")
 	return err
 }
 

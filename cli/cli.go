@@ -15,8 +15,12 @@ func NewCli(db *storage.Db) *Cli {
 }
 
 func (cli *Cli) read(key string) {
-	value, err := cli.db.Get(key)
+	found, value, err := cli.db.Get(key)
 	if err != nil {
+		return
+	}
+	if !found {
+		fmt.Println("Invalid key " + key)
 		return
 	}
 	fmt.Println("GET " + key + ": " + value)
@@ -30,6 +34,14 @@ func (cli *Cli) write(key string, value string) {
 	fmt.Println("SET " + key + ": " + value)
 }
 
+func (cli *Cli) delete(key string) {
+	err := cli.db.Delete(key)
+	if err != nil {
+		return
+	}
+	fmt.Println("DELETE " + key)
+}
+
 func (cli *Cli) Work(args []string) {
 	size := len(args)
 
@@ -37,6 +49,8 @@ func (cli *Cli) Work(args []string) {
 		cli.read(args[1])
 	} else if size == 3 && args[0] == "set" {
 		cli.write(args[1], args[2])
+	} else if size == 2 && args[0] == "delete" {
+		cli.delete(args[1])
 	} else {
 		println("Invalid arguments")
 	}
