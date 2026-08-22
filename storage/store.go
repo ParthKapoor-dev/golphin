@@ -1,67 +1,95 @@
 package storage
 
 import (
-	"io"
 	"os"
-	"strings"
+	"strconv"
 )
 
 type Db struct {
-	file     *os.File
-	filePath string
+	segments             []*segment
+	maxRecordsPerSegment int
+	dirPath              string
 }
 
-func getFile(filePath string) (*os.File, error) {
-	return os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
+func (db *Db) addSegment() (*segment, error) {
+	size := len(db.segments)
+	filepath := db.dirPath + "/" + strconv.Itoa(size+1) + ".txt"
+	seg, err := newSegment(filepath)
+	if err != nil {
+		return nil, err
+	}
+	db.segments = append(db.segments, seg)
+	return seg, err
 }
 
-func GetDB(filePath string) (*Db, error) {
-	file, err := getFile(filePath)
+func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
+
+	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Db{file, filePath}, nil
+	var segments []*segment
+
+	for _, file := range files {
+		if !file.IsDir() {
+			seg, err := newSegment(file.Name())
+			if err == nil {
+				segments = append(segments, seg)
+			}
+		}
+	}
+
+	db := &Db{
+		segments,
+		maxRecordsPerSegment,
+		dirPath,
+	}
+
+	if len(segments) == 0 {
+		db.addSegment()
+	}
+
+	return db, nil
 }
 
 func (db *Db) Get(key string) (bool, string, error) {
 
-	revReader, err := newReverseReader(db.file)
-	if err != nil {
-		return false, "", err
-	}
-	defer revReader.close()
+	size := len(db.segments)
 
-	for {
-		line, err := revReader.readLine()
-		if err == io.EOF {
-			break
+	for i := size - 1; i >= 0; i-- {
+		found, value, err := db.segments[i].find(key)
+		if found {
+			return found, value, err
 		}
 		if err != nil {
 			return false, "", err
 		}
-
-		kv := strings.Split(line, ":")
-		if kv[0] == key {
-			if kv[1] == "\000" {
-				return false, "", nil
-			}
-			return true, kv[1], nil
-		}
 	}
+
 	return false, "", nil
 }
 
-func (db *Db) Upsert(key string, value string) error {
-	_, err := db.file.WriteString(key + ":" + value + "\n")
-	return err
+func (db *Db) Set(key string, value string) error {
+	size := len(db.segments)
+	var seg = db.segments[size-1]
+	if seg.count >= db.maxRecordsPerSegment {
+		seg, _ = db.addSegment()
+	}
+	return seg.upsert(key, value)
 }
 
 func (db *Db) Delete(key string) error {
-	_, err := db.file.WriteString(key + ":" + "\000" + "\n")
-	return err
+	size := len(db.segments)
+	var seg = db.segments[size-1]
+	if seg.count >= db.maxRecordsPerSegment {
+		seg, _ = db.addSegment()
+	}
+	return seg.delete(key)
 }
 
 func (db *Db) Close() {
-	db.file.Close()
+	for _, seg := range db.segments {
+		seg.close()
+	}
 }

@@ -19,5 +19,4 @@ func main() {
 
 	cli := cli.NewCli(db)
 	cli.Work(args)
-
 }

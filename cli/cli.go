@@ -27,7 +27,7 @@ func (cli *Cli) read(key string) {
 }
 
 func (cli *Cli) write(key string, value string) {
-	err := cli.db.Upsert(key, value)
+	err := cli.db.Set(key, value)
 	if err != nil {
 		return
 	}

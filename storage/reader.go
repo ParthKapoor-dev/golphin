@@ -49,11 +49,9 @@ func (r *ReverseReader) readLine() (string, error) {
 			if len(r.buf) == 0 {
 				return "", io.EOF
 			}
-
 			// return the first line
 			line := r.buf
 			r.buf = nil
-
 			return string(line), nil
 		}
 
