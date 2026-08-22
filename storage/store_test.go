@@ -92,10 +92,19 @@ func TestDeleteMakesKeyUnavailable(t *testing.T) {
 }
 
 func TestDataSurvivesReopen(t *testing.T) {
-	oldDb := newTestDB(t, 3)
+	dir := t.TempDir()
+	oldDb, err := storage.GetDB(dir, 2)
+	if err != nil {
+		t.Fatalf("GetDB() error : %v", err)
+	}
+	t.Cleanup(oldDb.Close)
 	oldDb.Close()
 
-	db := newTestDB(t, 3)
+	db, err := storage.GetDB(dir, 2)
+	if err != nil {
+		t.Fatalf("GetDB() error : %v", err)
+	}
+	t.Cleanup(db.Close)
 
 	if err := db.Set("lang", "go"); err != nil {
 		t.Fatalf("Set() error: %v", err)
