@@ -1,7 +1,9 @@
 package storage
 
 import (
+	"bufio"
 	"io"
+	"log"
 	"os"
 	"strings"
 )
@@ -22,9 +24,22 @@ func newSegment(filepath string) (*segment, error) {
 		return nil, err
 	}
 
+	lineCount := 0
+	scanner := bufio.NewScanner(file)
+
+	// Step through the file line by line
+	for scanner.Scan() {
+		lineCount++
+	}
+
+	// Check for errors during scanning
+	if err := scanner.Err(); err != nil {
+		log.Fatalf("error during scan: %s", err)
+	}
+
 	return &segment{
 		file:  file,
-		count: 0,
+		count: lineCount,
 	}, nil
 }
 
@@ -57,13 +72,19 @@ func (seg *segment) find(key string) (bool, string, error) {
 }
 
 func (seg *segment) upsert(key string, value string) error {
-	_, err := seg.file.WriteString(key + ":" + value + "\n")
-	return err
+	if _, err := seg.file.WriteString(key + ":" + value + "\n"); err != nil {
+		return err
+	}
+	seg.count++
+	return nil
 }
 
 func (seg *segment) delete(key string) error {
-	_, err := seg.file.WriteString(key + ":" + "\000" + "\n")
-	return err
+	if _, err := seg.file.WriteString(key + ":" + "\000" + "\n"); err != nil {
+		return err
+	}
+	seg.count++
+	return nil
 }
 
 func (seg *segment) close() {

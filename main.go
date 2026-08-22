@@ -11,7 +11,7 @@ import (
 func main() {
 	args := os.Args[1:]
 
-	db, err := storage.GetDB("test.txt")
+	db, err := storage.GetDB("./test", 3)
 	if err != nil {
 		fmt.Println("Unable to establish db connection")
 	}

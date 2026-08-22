@@ -22,6 +22,15 @@ func (db *Db) addSegment() (*segment, error) {
 	return seg, err
 }
 
+func (db *Db) getSegment() (*segment, error) {
+	size := len(db.segments)
+	var seg = db.segments[size-1]
+	if seg.count >= db.maxRecordsPerSegment {
+		seg, _ = db.addSegment()
+	}
+	return seg, nil
+}
+
 func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 
 	files, err := os.ReadDir(dirPath)
@@ -33,7 +42,8 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 
 	for _, file := range files {
 		if !file.IsDir() {
-			seg, err := newSegment(file.Name())
+			filepath := dirPath + "/" + file.Name()
+			seg, err := newSegment(filepath)
 			if err == nil {
 				segments = append(segments, seg)
 			}
@@ -71,20 +81,12 @@ func (db *Db) Get(key string) (bool, string, error) {
 }
 
 func (db *Db) Set(key string, value string) error {
-	size := len(db.segments)
-	var seg = db.segments[size-1]
-	if seg.count >= db.maxRecordsPerSegment {
-		seg, _ = db.addSegment()
-	}
+	seg, _ := db.getSegment()
 	return seg.upsert(key, value)
 }
 
 func (db *Db) Delete(key string) error {
-	size := len(db.segments)
-	var seg = db.segments[size-1]
-	if seg.count >= db.maxRecordsPerSegment {
-		seg, _ = db.addSegment()
-	}
+	seg, _ := db.getSegment()
 	return seg.delete(key)
 }
 
