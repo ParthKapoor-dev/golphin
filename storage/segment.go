@@ -61,9 +61,6 @@ func (seg *segment) find(key string) (bool, string, error) {
 
 		kv := strings.Split(line, ":")
 		if kv[0] == key {
-			if kv[1] == "\000" {
-				return false, "", nil
-			}
 			return true, kv[1], nil
 		}
 	}
@@ -79,7 +76,7 @@ func (seg *segment) upsert(key string, value string) error {
 }
 
 func (seg *segment) delete(key string) error {
-	if _, err := seg.file.WriteString(key + ":" + "\000" + "\n"); err != nil {
+	if _, err := seg.file.WriteString(key + ":" + tombstone + "\n"); err != nil {
 		return fmt.Errorf("Unable to write to file %q, %q : %w", seg.file.Name(), key, err)
 	}
 	seg.count++

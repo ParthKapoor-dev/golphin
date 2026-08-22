@@ -6,6 +6,8 @@ import (
 	"strconv"
 )
 
+const tombstone = "\000"
+
 type Db struct {
 	segments             []*segment
 	maxRecordsPerSegment int
@@ -73,12 +75,16 @@ func (db *Db) Get(key string) (bool, string, error) {
 
 	for i := size - 1; i >= 0; i-- {
 		found, value, err := db.segments[i].find(key)
-		if found {
-			return found, value, err
-		}
 		if err != nil {
 			return false, "", err
 		}
+		if !found {
+			continue
+		}
+		if value == tombstone {
+			return false, "", nil
+		}
+		return true, value, nil
 	}
 
 	return false, "", nil
