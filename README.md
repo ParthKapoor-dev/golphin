@@ -3,9 +3,15 @@
 
 This is a project, where i try to build a db from scratch in goLang. my aim? to build postgreSQL; ohh u mean realistically? to reach as near as possible to sqlite. 
 
+## Whats done? 
+1. Append only upserting / deletion
+2. greedily searching for key in reverse
+3. segmenations
+
 ## How to run this project 
-- go run main.go set key value
-- go run main.go get key
+- ./golphin set key value
+- ./golphin get key
+- ./golphin delete key  
 
 
 ## ROADMAP
