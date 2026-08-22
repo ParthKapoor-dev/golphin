@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"bufio"
+	"io"
 	"os"
 	"strings"
 )
@@ -25,29 +25,30 @@ func GetDB(filePath string) (*Db, error) {
 }
 
 func (db *Db) Get(key string) (bool, string, error) {
-	scanner := bufio.NewScanner(db.file)
 
-	var lines []string
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	if err := scanner.Err(); err != nil {
+	revReader, err := newReverseReader(db.file)
+	if err != nil {
 		return false, "", err
 	}
+	defer revReader.close()
 
-	for i := len(lines) - 1; i >= 0; i-- {
-		line := lines[i]
+	for {
+		line, err := revReader.readLine()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return false, "", err
+		}
+
 		kv := strings.Split(line, ":")
 		if kv[0] == key {
 			if kv[1] == "\000" {
 				return false, "", nil
 			}
-
 			return true, kv[1], nil
 		}
 	}
-
 	return false, "", nil
 }
 
