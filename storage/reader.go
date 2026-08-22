@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"io"
 	"os"
 )
@@ -18,7 +19,7 @@ func newReverseReader(file *os.File) (*ReverseReader, error) {
 
 	info, err := file.Stat()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("RevReader - File doesn't exists: %w", err)
 	}
 
 	return &ReverseReader{
@@ -65,7 +66,7 @@ func (r *ReverseReader) readLine() (string, error) {
 		// find the file pointer for this position
 		_, err := r.file.Seek(r.pos, io.SeekStart)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("Unable to find pointer in file %q, pos: %d: %w", r.file.Name(), r.pos, err)
 		}
 
 		// copy the next chunk from file position to readsize length into chunk
@@ -73,7 +74,7 @@ func (r *ReverseReader) readLine() (string, error) {
 
 		n, err := r.file.Read(chunk)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("Unable to read file into chunk: %w", err)
 		}
 
 		// append it in the buffer

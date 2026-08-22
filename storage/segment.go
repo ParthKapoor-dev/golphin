@@ -2,8 +2,8 @@ package storage
 
 import (
 	"bufio"
+	"fmt"
 	"io"
-	"log"
 	"os"
 	"strings"
 )
@@ -21,20 +21,19 @@ func getFile(filePath string) (*os.File, error) {
 func newSegment(filepath string) (*segment, error) {
 	file, err := getFile(filepath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("open segment: %w", err)
 	}
 
 	lineCount := 0
 	scanner := bufio.NewScanner(file)
 
-	// Step through the file line by line
 	for scanner.Scan() {
 		lineCount++
 	}
 
-	// Check for errors during scanning
 	if err := scanner.Err(); err != nil {
-		log.Fatalf("error during scan: %s", err)
+		file.Close()
+		return nil, fmt.Errorf("Unable to count records in file %q: %w", filepath, err)
 	}
 
 	return &segment{
@@ -73,7 +72,7 @@ func (seg *segment) find(key string) (bool, string, error) {
 
 func (seg *segment) upsert(key string, value string) error {
 	if _, err := seg.file.WriteString(key + ":" + value + "\n"); err != nil {
-		return err
+		return fmt.Errorf("Unable to write to file %q, %q : %w", seg.file.Name(), key, err)
 	}
 	seg.count++
 	return nil
@@ -81,7 +80,7 @@ func (seg *segment) upsert(key string, value string) error {
 
 func (seg *segment) delete(key string) error {
 	if _, err := seg.file.WriteString(key + ":" + "\000" + "\n"); err != nil {
-		return err
+		return fmt.Errorf("Unable to write to file %q, %q : %w", seg.file.Name(), key, err)
 	}
 	seg.count++
 	return nil

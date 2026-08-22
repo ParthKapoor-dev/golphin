@@ -11,12 +11,23 @@ import (
 func main() {
 	args := os.Args[1:]
 
+	if err := run(args); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+}
+
+func run(args []string) error {
+
 	db, err := storage.GetDB("./test", 3)
 	if err != nil {
-		fmt.Println("Unable to establish db connection")
+		return fmt.Errorf("Open db: %w", err)
 	}
 	defer db.Close()
 
-	cli := cli.NewCli(db)
-	cli.Work(args)
+	if err := cli.NewCli(db).Work(args); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 )
@@ -26,7 +27,7 @@ func (db *Db) getSegment() (*segment, error) {
 	size := len(db.segments)
 	var seg = db.segments[size-1]
 	if seg.count >= db.maxRecordsPerSegment {
-		seg, _ = db.addSegment()
+		return db.addSegment()
 	}
 	return seg, nil
 }
@@ -35,7 +36,7 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 
 	files, err := os.ReadDir(dirPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to read dir %q: %w", dirPath, err)
 	}
 
 	var segments []*segment
@@ -44,9 +45,10 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 		if !file.IsDir() {
 			filepath := dirPath + "/" + file.Name()
 			seg, err := newSegment(filepath)
-			if err == nil {
-				segments = append(segments, seg)
+			if err != nil {
+				return nil, err
 			}
+			segments = append(segments, seg)
 		}
 	}
 
@@ -57,7 +59,9 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	}
 
 	if len(segments) == 0 {
-		db.addSegment()
+		if _, err := db.addSegment(); err != nil {
+			return nil, err
+		}
 	}
 
 	return db, nil
@@ -81,12 +85,18 @@ func (db *Db) Get(key string) (bool, string, error) {
 }
 
 func (db *Db) Set(key string, value string) error {
-	seg, _ := db.getSegment()
+	seg, err := db.getSegment()
+	if err != nil {
+		return err
+	}
 	return seg.upsert(key, value)
 }
 
 func (db *Db) Delete(key string) error {
-	seg, _ := db.getSegment()
+	seg, err := db.getSegment()
+	if err != nil {
+		return err
+	}
 	return seg.delete(key)
 }
 
