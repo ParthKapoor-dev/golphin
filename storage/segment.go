@@ -29,7 +29,7 @@ func getFile(filePath string) (*os.File, error) {
 	return file, nil
 }
 
-func newSegment(filepath string) (*segment, error) {
+func newSegment(filepath string, dirPath string) (*segment, error) {
 	file, err := getFile(filepath)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func newSegment(filepath string) (*segment, error) {
 	}
 
 	// TODO: better way for finding the id
-	segId, err := strconv.Atoi(strings.Split(strings.Split(filepath, ".txt")[0], "./test/")[1])
+	segId, err := strconv.Atoi(strings.Split(strings.Split(filepath, ".txt")[0], dirPath+"/")[1])
 	if err != nil {
 		return nil, err
 	}

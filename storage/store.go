@@ -33,7 +33,7 @@ func (db *Db) addSegment() (*segment, error) {
 	size := len(db.segments)
 	// TODO: fix this hardcoded way for the next file name
 	filepath := db.dirPath + "/" + strconv.Itoa(size+1) + ".txt"
-	seg, err := newSegment(filepath)
+	seg, err := newSegment(filepath, db.dirPath)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	for _, file := range files {
 		if !file.IsDir() {
 			filepath := dirPath + "/" + file.Name()
-			seg, err := newSegment(filepath)
+			seg, err := newSegment(filepath, dirPath)
 			if err != nil {
 				return nil, err
 			}
