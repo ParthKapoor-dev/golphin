@@ -109,6 +109,7 @@ func (r *ReverseReader) deleteLine(startPos int64, stringLen int) error {
 	if err := r.file.Truncate(newFileSize); err != nil {
 		return fmt.Errorf("failed to truncate file: %w", err)
 	}
+	r.fileSize = newFileSize
 	return nil
 }
 

@@ -8,6 +8,9 @@ import (
 	"github.com/parthkapoor-dev/golphin/storage"
 )
 
+const dbDirPath = "./test"
+const maxRecordsPerSegment = 3
+
 func main() {
 	args := os.Args[1:]
 
@@ -19,7 +22,7 @@ func main() {
 
 func run(args []string) error {
 
-	db, err := storage.GetDB("./test", 3)
+	db, err := storage.GetDB(dbDirPath, maxRecordsPerSegment)
 	if err != nil {
 		return fmt.Errorf("Open db: %w", err)
 	}

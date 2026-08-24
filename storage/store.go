@@ -1,8 +1,10 @@
 package storage
 
 import (
+	"cmp"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 )
 
@@ -15,7 +17,7 @@ type Db struct {
 }
 
 func (db *Db) compact() error {
-
+	fmt.Println("Starting DB compaction")
 	cache := make(map[string]bool)
 	size := len(db.segments)
 	for i := size - 1; i >= 0; i-- {
@@ -29,6 +31,7 @@ func (db *Db) compact() error {
 
 func (db *Db) addSegment() (*segment, error) {
 	size := len(db.segments)
+	// TODO: fix this hardcoded way for the next file name
 	filepath := db.dirPath + "/" + strconv.Itoa(size+1) + ".txt"
 	seg, err := newSegment(filepath)
 	if err != nil {
@@ -70,6 +73,10 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 			segments = append(segments, seg)
 		}
 	}
+
+	slices.SortFunc(segments, func(a, b *segment) int {
+		return cmp.Compare(a.id, b.id)
+	})
 
 	db := &Db{
 		segments,
