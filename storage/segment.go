@@ -83,6 +83,10 @@ func (seg *segment) delete(key string) error {
 	return nil
 }
 
+// func (seg *segment) compact() error {
+
+// }
+
 func (seg *segment) close() {
 	seg.file.Close()
 }

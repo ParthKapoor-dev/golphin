@@ -1,6 +1,7 @@
 package storage_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/parthkapoor-dev/golphin/storage"
@@ -130,4 +131,30 @@ func TestDeleteAcrossSegments(t *testing.T) {
 	}
 
 	requireMissing(t, db, "lang")
+}
+
+// benchmarking
+
+func BenchmarkGetOldest(b *testing.B) {
+
+	db, err := storage.GetDB(b.TempDir(), 10_001)
+	if err != nil {
+		b.Fatal(err)
+	}
+	defer db.Close()
+
+	for i := range 10_001 {
+		key := fmt.Sprintf("key-%d", i)
+		if err := db.Set(key, "value"); err != nil {
+			b.Fatal(err)
+		}
+	}
+	b.ResetTimer()
+
+	for b.Loop() {
+		if _, _, err := db.Get("key-0"); err != nil {
+			b.Fatal(err)
+		}
+	}
+
 }
