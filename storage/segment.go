@@ -51,7 +51,7 @@ func (seg *segment) find(key string) (bool, string, error) {
 	defer revReader.close()
 
 	for {
-		line, err := revReader.readLine()
+		line, _, err := revReader.readLine()
 		if err == io.EOF {
 			break
 		}
@@ -83,9 +83,34 @@ func (seg *segment) delete(key string) error {
 	return nil
 }
 
-// func (seg *segment) compact() error {
+func (seg *segment) compact(cache map[string]bool) error {
 
-// }
+	revReader, err := newReverseReader(seg.file)
+	if err != nil {
+		return err
+	}
+	defer revReader.close()
+
+	for {
+		line, pos, err := revReader.readLine()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		kv := strings.Split(line, ":")
+		if len(kv) == 2 && cache[kv[0]] {
+			// remove this line
+			if err := revReader.deleteLine(pos, len(line)); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
 
 func (seg *segment) close() {
 	seg.file.Close()

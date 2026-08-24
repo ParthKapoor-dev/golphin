@@ -14,6 +14,19 @@ type Db struct {
 	dirPath              string
 }
 
+func (db *Db) compact() error {
+
+	cache := make(map[string]bool)
+	size := len(db.segments)
+	for i := size - 1; i >= 0; i-- {
+		if err := db.segments[i].compact(cache); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (db *Db) addSegment() (*segment, error) {
 	size := len(db.segments)
 	filepath := db.dirPath + "/" + strconv.Itoa(size+1) + ".txt"
@@ -29,6 +42,10 @@ func (db *Db) getSegment() (*segment, error) {
 	size := len(db.segments)
 	var seg = db.segments[size-1]
 	if seg.count >= db.maxRecordsPerSegment {
+		// TODO: make this bg process; so here we just invoke compaction
+		if err := db.compact(); err != nil {
+			return nil, err
+		}
 		return db.addSegment()
 	}
 	return seg, nil
