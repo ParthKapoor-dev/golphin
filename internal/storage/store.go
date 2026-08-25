@@ -13,7 +13,18 @@ type Db struct {
 	segments             []*segment
 	maxRecordsPerSegment int
 	dirPath              string
-	Size                 int
+	size                 int
+	idxCache             map[string]*IdxRecord
+}
+
+func (db *Db) initIndexing() error {
+
+	size := len(db.segments)
+	for i := size - 1; i >= 0; i-- {
+		db.segments[i].indexing(db.idxCache)
+	}
+
+	return nil
 }
 
 func (db *Db) compact() error {
@@ -33,10 +44,12 @@ func (db *Db) addSegment() (*segment, error) {
 	// TODO: fix this hardcoded way for the next file name
 	newIdx := size + 1
 	filepath := db.dirPath + "/" + strconv.Itoa(newIdx) + ".txt"
-	seg, err := newSegment(newIdx, filepath, db.dirPath)
+
+	seg, err := newSegment(newIdx, filepath)
 	if err != nil {
 		return nil, err
 	}
+
 	db.segments = append(db.segments, seg)
 	return seg, err
 }
@@ -64,16 +77,19 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	var segments []*segment
 
 	for _, file := range files {
-		if !file.IsDir() {
+		if !file.IsDir() && strings.Contains(file.Name(), ".txt") {
 			filepath := dirPath + "/" + file.Name()
+
 			fileId, err := strconv.Atoi(strings.Split(file.Name(), ".txt")[0])
 			if err != nil {
 				return nil, fmt.Errorf("get fileId: %w", err)
 			}
-			seg, err := newSegment(fileId, filepath, dirPath)
+
+			seg, err := newSegment(fileId, filepath)
 			if err != nil {
 				return nil, err
 			}
+
 			segments = append(segments, seg)
 		}
 	}
@@ -82,14 +98,19 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 		return cmp.Compare(a.id, b.id)
 	})
 
-	// db size
 	size := 0
+	idxCache := make(map[string]*IdxRecord)
 
 	db := &Db{
 		segments,
 		maxRecordsPerSegment,
 		dirPath,
 		size,
+		idxCache,
+	}
+
+	if err := db.initIndexing(); err != nil {
+		return nil, err
 	}
 
 	if len(segments) == 0 {
@@ -110,6 +131,25 @@ func (db *Db) GetSize() (int, error) {
 }
 
 func (db *Db) Get(key string) (bool, string, error) {
+
+	if err := db.initIndexing(); err != nil {
+		return false, "", err
+	}
+
+	idxRec, exists := db.idxCache[key]
+	if !exists {
+		return false, "", nil
+	}
+
+	value, err := idxRec.get()
+	if err != nil || value == tombstone {
+		return false, "", err
+	}
+
+	return true, value, nil
+}
+
+func (db *Db) legacyGet(key string) (bool, string, error) {
 
 	size := len(db.segments)
 

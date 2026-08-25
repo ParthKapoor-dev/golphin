@@ -18,6 +18,7 @@ This is a project, where i try to build a db from scratch in goLang. my aim? to 
 
 ## ROADMAP
 1. dont know yet.
+2. Working on Indexing now: I'll start with creating the index on every run, and then optimize this by saving snapshot in a tmp file
 
 ## References
 1. https://www.nan.fyi/database

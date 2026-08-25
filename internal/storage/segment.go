@@ -15,7 +15,7 @@ type segment struct {
 	count int
 }
 
-func newSegment(fileId int, filepath, dirPath string) (*segment, error) {
+func newSegment(fileId int, filepath string) (*segment, error) {
 	file, err := fs.EnsureFile(filepath)
 	if err != nil {
 		return nil, err
@@ -117,6 +117,35 @@ func (seg *segment) compact(cache map[string]bool) error {
 
 		seg.file = file
 		seg.count -= len(skips)
+	}
+
+	return nil
+}
+
+func (seg *segment) indexing(cache map[string]*IdxRecord) error {
+
+	revReader, err := fs.NewReverseReader(seg.file)
+	if err != nil {
+		return err
+	}
+	defer revReader.Close()
+
+	for {
+		line, pos, err := revReader.ReadLine()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		rec := decode(line)
+		if rec != nil {
+			_, exists := cache[rec.key]
+			if !exists {
+				cache[rec.key] = newIdxRecord(rec.key, seg, pos, pos+int64(len(line))+1)
+			}
+		}
 	}
 
 	return nil
