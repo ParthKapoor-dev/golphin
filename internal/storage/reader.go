@@ -84,6 +84,7 @@ func (r *ReverseReader) readLine() (string, int64, error) {
 	}
 }
 
+// not used anywhere yet. but good to keep
 func (r *ReverseReader) deleteLine(startPos int64, stringLen int) error {
 
 	lineLen := int64(stringLen) + 1

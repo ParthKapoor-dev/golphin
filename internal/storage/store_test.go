@@ -2,6 +2,8 @@ package storage_test
 
 import (
 	"fmt"
+	"math/rand"
+	"strconv"
 	"testing"
 
 	"github.com/parthkapoor-dev/golphin/internal/storage"
@@ -131,6 +133,55 @@ func TestDeleteAcrossSegments(t *testing.T) {
 	}
 
 	requireMissing(t, db, "lang")
+}
+
+func TestRandomDataAndCompaction(t *testing.T) {
+
+	db := newTestDB(t, 3)
+
+	cache := make(map[string]string)
+	maxKey := 10
+
+	for i := range 1000 {
+		key := strconv.Itoa(rand.Intn(maxKey))
+		value := strconv.Itoa(rand.Intn(10 * maxKey))
+
+		_, exists := cache[key]
+
+		if i%2 == 0 && exists {
+			err := db.Delete(key)
+			if err != nil {
+				t.Fatalf("Delete() error: %v", err)
+			}
+			delete(cache, key)
+		} else {
+			err := db.Set(key, value)
+			if err != nil {
+				t.Fatalf("Set() error: %v", err)
+			}
+			cache[key] = value
+		}
+	}
+
+	for i := range maxKey {
+		key := strconv.Itoa(i)
+		value, ok := cache[key]
+		if ok {
+			requireValue(t, db, key, value)
+		} else {
+			requireMissing(t, db, key)
+		}
+	}
+
+	dbCnt, err := db.GetSize()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if dbCnt > len(cache)+1 {
+		t.Fatal("compaction failed!")
+	}
+
 }
 
 // benchmarking

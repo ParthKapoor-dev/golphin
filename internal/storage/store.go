@@ -14,10 +14,10 @@ type Db struct {
 	segments             []*segment
 	maxRecordsPerSegment int
 	dirPath              string
+	Size                 int
 }
 
 func (db *Db) compact() error {
-	fmt.Println("Starting DB compaction")
 	cache := make(map[string]bool)
 	size := len(db.segments)
 	for i := size - 1; i >= 0; i-- {
@@ -78,10 +78,14 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 		return cmp.Compare(a.id, b.id)
 	})
 
+	// db size
+	size := 0
+
 	db := &Db{
 		segments,
 		maxRecordsPerSegment,
 		dirPath,
+		size,
 	}
 
 	if len(segments) == 0 {
@@ -91,6 +95,14 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	}
 
 	return db, nil
+}
+
+func (db *Db) GetSize() (int, error) {
+	var count = 0
+	for _, seg := range db.segments {
+		count += seg.count
+	}
+	return count, nil
 }
 
 func (db *Db) Get(key string) (bool, string, error) {

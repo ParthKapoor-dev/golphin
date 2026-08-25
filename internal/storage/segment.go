@@ -183,6 +183,8 @@ func (seg *segment) replaceSegment(pairs []Pair) error {
 	if !fileCompactionSuccess {
 		return fmt.Errorf("compaction process failed!")
 	}
+
+	seg.count -= skipSize
 	return nil
 }
 
