@@ -13,3 +13,7 @@ func EnsureFile(filePath string) (*os.File, error) {
 	}
 	return file, nil
 }
+
+func GetFileName(dirPath, name string) string {
+	return dirPath + "/" + name
+}

@@ -6,9 +6,8 @@ import (
 	"os"
 	"slices"
 	"strconv"
+	"strings"
 )
-
-const tombstone = "\000"
 
 type Db struct {
 	segments             []*segment
@@ -32,8 +31,9 @@ func (db *Db) compact() error {
 func (db *Db) addSegment() (*segment, error) {
 	size := len(db.segments)
 	// TODO: fix this hardcoded way for the next file name
-	filepath := db.dirPath + "/" + strconv.Itoa(size+1) + ".txt"
-	seg, err := newSegment(filepath, db.dirPath)
+	newIdx := size + 1
+	filepath := db.dirPath + "/" + strconv.Itoa(newIdx) + ".txt"
+	seg, err := newSegment(newIdx, filepath, db.dirPath)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,11 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	for _, file := range files {
 		if !file.IsDir() {
 			filepath := dirPath + "/" + file.Name()
-			seg, err := newSegment(filepath, dirPath)
+			fileId, err := strconv.Atoi(strings.Split(file.Name(), ".txt")[0])
+			if err != nil {
+				return nil, fmt.Errorf("get fileId: %w", err)
+			}
+			seg, err := newSegment(fileId, filepath, dirPath)
 			if err != nil {
 				return nil, err
 			}

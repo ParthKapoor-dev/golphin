@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/parthkapoor-dev/golphin/internal/fs"
 )
@@ -17,7 +15,7 @@ type segment struct {
 	count int
 }
 
-func newSegment(filepath string, dirPath string) (*segment, error) {
+func newSegment(fileId int, filepath, dirPath string) (*segment, error) {
 	file, err := fs.EnsureFile(filepath)
 	if err != nil {
 		return nil, err
@@ -35,16 +33,10 @@ func newSegment(filepath string, dirPath string) (*segment, error) {
 		return nil, fmt.Errorf("Unable to count records in file %q: %w", filepath, err)
 	}
 
-	// TODO: better way for finding the id
-	segId, err := strconv.Atoi(strings.Split(strings.Split(filepath, ".txt")[0], dirPath+"/")[1])
-	if err != nil {
-		return nil, err
-	}
-
 	return &segment{
 		file:  file,
 		count: lineCount,
-		id:    segId,
+		id:    fileId,
 	}, nil
 }
 
@@ -65,16 +57,16 @@ func (seg *segment) find(key string) (bool, string, error) {
 			return false, "", err
 		}
 
-		kv := strings.Split(line, ":")
-		if kv[0] == key {
-			return true, kv[1], nil
+		rec := decode(line)
+		if rec != nil && rec.key == key {
+			return true, rec.value, nil
 		}
 	}
 	return false, "", nil
 }
 
 func (seg *segment) upsert(key string, value string) error {
-	if _, err := seg.file.WriteString(key + ":" + value + "\n"); err != nil {
+	if _, err := seg.file.WriteString(encode(key, value).entry); err != nil {
 		return fmt.Errorf("Unable to write to file %q, %q : %w", seg.file.Name(), key, err)
 	}
 	seg.count++
@@ -82,28 +74,16 @@ func (seg *segment) upsert(key string, value string) error {
 }
 
 func (seg *segment) delete(key string) error {
-	if _, err := seg.file.WriteString(key + ":" + tombstone + "\n"); err != nil {
+	if _, err := seg.file.WriteString(encode(key, tombstone).entry); err != nil {
 		return fmt.Errorf("Unable to write to file %q, %q : %w", seg.file.Name(), key, err)
 	}
 	seg.count++
 	return nil
 }
 
-func (seg *segment) replaceSegment(skips []fs.Skip) error {
-
-	file, err := fs.ReplaceFile(skips, seg.file)
-	if err != nil {
-		return err
-	}
-
-	seg.file = file
-	seg.count -= len(skips)
-	return nil
-}
-
 func (seg *segment) compact(cache map[string]bool) error {
 
-	var pairs []fs.Skip
+	var skips []fs.Skip
 
 	revReader, err := fs.NewReverseReader(seg.file)
 	if err != nil {
@@ -120,19 +100,23 @@ func (seg *segment) compact(cache map[string]bool) error {
 			return err
 		}
 
-		kv := strings.Split(line, ":")
-		if len(kv) == 2 {
-			if cache[kv[0]] || kv[1] == tombstone {
-				pairs = append(pairs, fs.Skip{Start: pos, End: pos + int64(len(line)) + 1})
+		rec := decode(line)
+		if rec != nil {
+			if cache[rec.key] || rec.value == tombstone {
+				skips = append(skips, fs.Skip{Start: pos, End: pos + int64(len(line)) + 1})
 			}
-			cache[kv[0]] = true
+			cache[rec.key] = true
 		}
 	}
 
-	if len(pairs) != 0 {
-		if err := seg.replaceSegment(pairs); err != nil {
-			return fmt.Errorf("replacement failed: %w", err)
+	if len(skips) != 0 {
+		file, err := fs.ReplaceFile(skips, seg.file)
+		if err != nil {
+			return err
 		}
+
+		seg.file = file
+		seg.count -= len(skips)
 	}
 
 	return nil
