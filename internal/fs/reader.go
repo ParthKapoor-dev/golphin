@@ -1,4 +1,4 @@
-package storage
+package fs
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type ReverseReader struct {
 	buf      []byte
 }
 
-func newReverseReader(file *os.File) (*ReverseReader, error) {
+func NewReverseReader(file *os.File) (*ReverseReader, error) {
 	info, err := file.Stat()
 	if err != nil {
 		return nil, fmt.Errorf("RevReader - File doesn't exists: %w", err)
@@ -29,7 +29,7 @@ func newReverseReader(file *os.File) (*ReverseReader, error) {
 	}, nil
 }
 
-func (r *ReverseReader) readLine() (string, int64, error) {
+func (r *ReverseReader) ReadLine() (string, int64, error) {
 
 	for {
 
@@ -85,7 +85,7 @@ func (r *ReverseReader) readLine() (string, int64, error) {
 }
 
 // not used anywhere yet. but good to keep
-func (r *ReverseReader) deleteLine(startPos int64, stringLen int) error {
+func (r *ReverseReader) DeleteLine(startPos int64, stringLen int) error {
 
 	lineLen := int64(stringLen) + 1
 	endPos := startPos + lineLen
@@ -114,5 +114,5 @@ func (r *ReverseReader) deleteLine(startPos int64, stringLen int) error {
 	return nil
 }
 
-func (r *ReverseReader) close() {
+func (r *ReverseReader) Close() {
 }

@@ -10,7 +10,6 @@ import (
 )
 
 func newTestDB(t *testing.T, maxRecords int) *storage.Db {
-
 	// t.tempDir --> that exists during testing
 	db, err := storage.GetDB(t.TempDir(), maxRecords)
 	if err != nil {
