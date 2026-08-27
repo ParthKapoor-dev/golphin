@@ -6,6 +6,7 @@ type Record struct {
 	key   string
 	value string
 	entry string
+	chunk []byte
 }
 
 const tombstone = "\000"
@@ -13,10 +14,12 @@ const tombstone = "\000"
 func encode(key, value string) *Record {
 
 	entry := key + ":" + value + "\n"
-	return &Record{key, value, entry}
+	chunk := []byte(entry)
+	return &Record{key, value, entry, chunk}
 }
 
 func decode(line string) *Record {
+	line = strings.TrimSuffix(line, "\n")
 	kv := strings.Split(line, ":")
 
 	if len(kv) != 2 {

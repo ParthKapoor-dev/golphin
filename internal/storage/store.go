@@ -19,21 +19,31 @@ type Db struct {
 
 func (db *Db) initIndexing() error {
 
+	db.idxCache = make(map[string]*IdxRecord)
+
 	size := len(db.segments)
 	for i := size - 1; i >= 0; i-- {
-		db.segments[i].indexing(db.idxCache)
+		if err := db.segments[i].indexing(db.idxCache); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
 func (db *Db) compact() error {
+
 	cache := make(map[string]bool)
+
 	size := len(db.segments)
 	for i := size - 1; i >= 0; i-- {
 		if err := db.segments[i].compact(cache); err != nil {
 			return err
 		}
+	}
+
+	if err := db.initIndexing(); err != nil {
+		return err
 	}
 
 	return nil
@@ -99,7 +109,8 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	})
 
 	size := 0
-	idxCache := make(map[string]*IdxRecord)
+	var idxCache map[string]*IdxRecord
+	idxCache = nil
 
 	db := &Db{
 		segments,
@@ -132,18 +143,17 @@ func (db *Db) GetSize() (int, error) {
 
 func (db *Db) Get(key string) (bool, string, error) {
 
-	if err := db.initIndexing(); err != nil {
-		return false, "", err
-	}
-
 	idxRec, exists := db.idxCache[key]
 	if !exists {
 		return false, "", nil
 	}
 
-	value, err := idxRec.get()
-	if err != nil || value == tombstone {
+	found, value, err := idxRec.segment.get(idxRec)
+	if err != nil {
 		return false, "", err
+	}
+	if !found || value == tombstone {
+		return false, "", nil
 	}
 
 	return true, value, nil
@@ -154,7 +164,7 @@ func (db *Db) legacyGet(key string) (bool, string, error) {
 	size := len(db.segments)
 
 	for i := size - 1; i >= 0; i-- {
-		found, value, err := db.segments[i].find(key)
+		found, value, err := db.segments[i].search(key)
 		if err != nil {
 			return false, "", err
 		}
@@ -175,7 +185,15 @@ func (db *Db) Set(key string, value string) error {
 	if err != nil {
 		return err
 	}
-	return seg.upsert(key, value)
+
+	start, end, err := seg.upsert(key, value)
+	if err != nil {
+		return err
+	}
+
+	db.idxCache[key] = newIdxRecord(key, seg, start, end)
+
+	return nil
 }
 
 func (db *Db) Delete(key string) error {
@@ -183,7 +201,15 @@ func (db *Db) Delete(key string) error {
 	if err != nil {
 		return err
 	}
-	return seg.delete(key)
+
+	if _, _, err = seg.delete(key); err != nil {
+		return err
+	}
+
+	// db.idxCache[key] = newIdxRecord(key, seg, start, end)
+	delete(db.idxCache, key)
+
+	return nil
 }
 
 func (db *Db) Close() {

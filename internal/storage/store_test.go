@@ -10,6 +10,7 @@ import (
 )
 
 func newTestDB(t *testing.T, maxRecords int) *storage.Db {
+
 	// t.tempDir --> that exists during testing
 	db, err := storage.GetDB(t.TempDir(), maxRecords)
 	if err != nil {
@@ -61,6 +62,23 @@ func TestSetMakesValueRetrievable(t *testing.T) {
 	}
 
 	requireValue(t, db, "lang", "go")
+}
+
+func TestRetrievableSetAfterGet(t *testing.T) {
+
+	db := newTestDB(t, 3)
+
+	if err := db.Set("lang", "go"); err != nil {
+		t.Fatalf("Set() error: %v", err)
+	}
+
+	requireValue(t, db, "lang", "go")
+
+	if err := db.Set("claude", "code"); err != nil {
+		t.Fatalf("Set() error: %v", err)
+	}
+
+	requireValue(t, db, "claude", "code")
 }
 
 func TestSetReplacesExistingValue(t *testing.T) {

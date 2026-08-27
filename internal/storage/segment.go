@@ -40,7 +40,22 @@ func newSegment(fileId int, filepath string) (*segment, error) {
 	}, nil
 }
 
-func (seg *segment) find(key string) (bool, string, error) {
+func (seg *segment) get(idxRec *IdxRecord) (bool, string, error) {
+
+	chunk, err := fs.GetChunk(seg.file, idxRec.start, idxRec.end)
+	if err != nil {
+		return false, "", err
+	}
+
+	rec := decode(string(chunk))
+	if rec == nil {
+		return false, "", fmt.Errorf("decode entry failed")
+	}
+
+	return true, rec.value, nil
+}
+
+func (seg *segment) search(key string) (bool, string, error) {
 
 	revReader, err := fs.NewReverseReader(seg.file)
 	if err != nil {
@@ -65,20 +80,32 @@ func (seg *segment) find(key string) (bool, string, error) {
 	return false, "", nil
 }
 
-func (seg *segment) upsert(key string, value string) error {
-	if _, err := seg.file.WriteString(encode(key, value).entry); err != nil {
-		return fmt.Errorf("Unable to write to file %q, %q : %w", seg.file.Name(), key, err)
+func (seg *segment) upsert(key string, value string) (int64, int64, error) {
+
+	rec := encode(key, value)
+
+	start, end, err := fs.WriteChunk(seg.file, rec.chunk)
+	if err != nil {
+		return start, end, err
 	}
+
 	seg.count++
-	return nil
+
+	return start, end, nil
 }
 
-func (seg *segment) delete(key string) error {
-	if _, err := seg.file.WriteString(encode(key, tombstone).entry); err != nil {
-		return fmt.Errorf("Unable to write to file %q, %q : %w", seg.file.Name(), key, err)
+func (seg *segment) delete(key string) (int64, int64, error) {
+
+	rec := encode(key, tombstone)
+
+	start, end, err := fs.WriteChunk(seg.file, rec.chunk)
+	if err != nil {
+		return start, end, err
 	}
+
 	seg.count++
-	return nil
+
+	return start, end, nil
 }
 
 func (seg *segment) compact(cache map[string]bool) error {
