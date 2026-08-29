@@ -25,4 +25,4 @@ jobs:
         run: go mod download
 
       - name: Run unit tests
-        run: go test ./internal/storage -v
+        run: go test ./... -v
