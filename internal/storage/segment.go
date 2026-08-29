@@ -55,31 +55,6 @@ func (seg *segment) get(idxRec *IdxRecord) (bool, string, error) {
 	return true, rec.value, nil
 }
 
-func (seg *segment) search(key string) (bool, string, error) {
-
-	revReader, err := fs.NewReverseReader(seg.file)
-	if err != nil {
-		return false, "", err
-	}
-	defer revReader.Close()
-
-	for {
-		line, _, err := revReader.ReadLine()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return false, "", err
-		}
-
-		rec := decode(line)
-		if rec != nil && rec.key == key {
-			return true, rec.value, nil
-		}
-	}
-	return false, "", nil
-}
-
 func (seg *segment) upsert(key string, value string) (int64, int64, error) {
 
 	rec := encode(key, value)
@@ -180,4 +155,33 @@ func (seg *segment) indexing(cache map[string]*IdxRecord) error {
 
 func (seg *segment) close() {
 	seg.file.Close()
+}
+
+// ==============================================================
+// LEGACY CODE
+// ==============================================================
+
+func (seg *segment) search(key string) (bool, string, error) {
+
+	revReader, err := fs.NewReverseReader(seg.file)
+	if err != nil {
+		return false, "", err
+	}
+	defer revReader.Close()
+
+	for {
+		line, _, err := revReader.ReadLine()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return false, "", err
+		}
+
+		rec := decode(line)
+		if rec != nil && rec.key == key {
+			return true, rec.value, nil
+		}
+	}
+	return false, "", nil
 }

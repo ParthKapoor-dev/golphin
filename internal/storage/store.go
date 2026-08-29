@@ -2,11 +2,15 @@ package storage
 
 import (
 	"cmp"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/parthkapoor-dev/golphin/internal/fs"
 )
 
 type Db struct {
@@ -21,14 +25,93 @@ func (db *Db) initIndexing() error {
 
 	db.idxCache = make(map[string]*IdxRecord)
 
-	size := len(db.segments)
-	for i := size - 1; i >= 0; i-- {
-		if err := db.segments[i].indexing(db.idxCache); err != nil {
+	filePath := db.dirPath + "/_snapshot.txt"
+	snapFile, err := os.Open(filePath)
+	if errors.Is(err, os.ErrNotExist) {
+
+		size := len(db.segments)
+		for i := size - 1; i >= 0; i-- {
+			if err := db.segments[i].indexing(db.idxCache); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+
+	if err != nil {
+		return err
+	}
+	defer snapFile.Close()
+
+	revReader, err := fs.NewReverseReader(snapFile)
+	if err != nil {
+		return err
+	}
+	defer revReader.Close()
+
+	for {
+		line, _, err := revReader.ReadLine()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
 			return err
+		}
+
+		rec := strings.Split(line, ":")
+		if len(rec) == 4 {
+			key := rec[0]
+
+			segId, err := strconv.Atoi(rec[1])
+			if err != nil {
+				return err
+			}
+
+			// TODO: this would fail later on.
+			if len(db.segments) > segId {
+				return fmt.Errorf("Incorrect segId")
+			}
+			seg := db.segments[segId-1]
+
+			start, err := strconv.ParseInt(rec[2], 10, 64)
+			if err != nil {
+				return err
+			}
+
+			end, err := strconv.ParseInt(rec[3], 10, 64)
+			if err != nil {
+				return err
+			}
+
+			db.idxCache[key] = newIdxRecord(key, seg, start, end)
+
 		}
 	}
 
+	if err := os.Remove(filePath); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (db *Db) snapshot() error {
+
+	filePath := db.dirPath + "/_snapshot.txt"
+	snapFile, err := fs.EnsureFile(filePath)
+	if err != nil {
+		return err
+	}
+	defer snapFile.Close()
+
+	for key, rec := range db.idxCache {
+		chunk := []byte(key + ":" + strconv.Itoa(rec.segment.id) + ":" + strconv.FormatInt(rec.start, 10) + ":" + strconv.FormatInt(rec.end, 10) + "\n")
+		fs.WriteChunk(snapFile, chunk)
+	}
+
+	return nil
+
 }
 
 func (db *Db) compact() error {
@@ -87,7 +170,7 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	var segments []*segment
 
 	for _, file := range files {
-		if !file.IsDir() && strings.Contains(file.Name(), ".txt") {
+		if !file.IsDir() && strings.Contains(file.Name(), ".txt") && file.Name() != "_snapshot.txt" {
 			filepath := dirPath + "/" + file.Name()
 
 			fileId, err := strconv.Atoi(strings.Split(file.Name(), ".txt")[0])
@@ -213,6 +296,9 @@ func (db *Db) Delete(key string) error {
 }
 
 func (db *Db) Close() {
+
+	db.snapshot()
+
 	for _, seg := range db.segments {
 		seg.close()
 	}
