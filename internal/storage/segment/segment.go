@@ -1,4 +1,4 @@
-package storage
+package segment
 
 import (
 	"bufio"
@@ -7,15 +7,16 @@ import (
 	"os"
 
 	"github.com/parthkapoor-dev/golphin/internal/fs"
+	record "github.com/parthkapoor-dev/golphin/internal/storage/record"
 )
 
-type segment struct {
-	id    int
+type Segment struct {
+	Id    int
+	Count int
 	file  *os.File
-	count int
 }
 
-func newSegment(fileId int, filepath string) (*segment, error) {
+func NewSegment(fileId int, filepath string) (*Segment, error) {
 	file, err := fs.EnsureFile(filepath)
 	if err != nil {
 		return nil, err
@@ -33,57 +34,57 @@ func newSegment(fileId int, filepath string) (*segment, error) {
 		return nil, fmt.Errorf("Unable to count records in file %q: %w", filepath, err)
 	}
 
-	return &segment{
+	return &Segment{
 		file:  file,
-		count: lineCount,
-		id:    fileId,
+		Count: lineCount,
+		Id:    fileId,
 	}, nil
 }
 
-func (seg *segment) get(idxRec *IdxRecord) (bool, string, error) {
+func (seg *Segment) Get(start, end int64) (bool, string, error) {
 
-	chunk, err := fs.GetChunk(seg.file, idxRec.start, idxRec.end)
+	chunk, err := fs.GetChunk(seg.file, start, end)
 	if err != nil {
 		return false, "", err
 	}
 
-	rec := decode(string(chunk))
+	rec := record.Decode(string(chunk))
 	if rec == nil {
 		return false, "", fmt.Errorf("decode entry failed")
 	}
 
-	return true, rec.value, nil
+	return true, rec.Value, nil
 }
 
-func (seg *segment) upsert(key string, value string) (int64, int64, error) {
+func (seg *Segment) Upsert(key string, value string) (int64, int64, error) {
 
-	rec := encode(key, value)
+	rec := record.Encode(key, value)
 
-	start, end, err := fs.WriteChunk(seg.file, rec.chunk)
+	start, end, err := fs.WriteChunk(seg.file, rec.Chunk)
 	if err != nil {
 		return start, end, err
 	}
 
-	seg.count++
+	seg.Count++
 
 	return start, end, nil
 }
 
-func (seg *segment) delete(key string) (int64, int64, error) {
+func (seg *Segment) Delete(key string) (int64, int64, error) {
 
-	rec := encode(key, tombstone)
+	rec := record.Encode(key, record.Tombstone)
 
-	start, end, err := fs.WriteChunk(seg.file, rec.chunk)
+	start, end, err := fs.WriteChunk(seg.file, rec.Chunk)
 	if err != nil {
 		return start, end, err
 	}
 
-	seg.count++
+	seg.Count++
 
 	return start, end, nil
 }
 
-func (seg *segment) compact(cache map[string]bool) error {
+func (seg *Segment) Compact(cache map[string]bool) error {
 
 	var skips []fs.Skip
 
@@ -102,12 +103,12 @@ func (seg *segment) compact(cache map[string]bool) error {
 			return err
 		}
 
-		rec := decode(line)
+		rec := record.Decode(line)
 		if rec != nil {
-			if cache[rec.key] || rec.value == tombstone {
+			if cache[rec.Key] || rec.Value == record.Tombstone {
 				skips = append(skips, fs.Skip{Start: pos, End: pos + int64(len(line)) + 1})
 			}
-			cache[rec.key] = true
+			cache[rec.Key] = true
 		}
 	}
 
@@ -118,42 +119,23 @@ func (seg *segment) compact(cache map[string]bool) error {
 		}
 
 		seg.file = file
-		seg.count -= len(skips)
+		seg.Count -= len(skips)
 	}
 
 	return nil
 }
 
-func (seg *segment) indexing(cache map[string]*IdxRecord) error {
-
-	revReader, err := fs.NewReverseReader(seg.file)
-	if err != nil {
-		return err
-	}
-	defer revReader.Close()
-
-	for {
-		line, pos, err := revReader.ReadLine()
-		if err == io.EOF {
-			break
+func (seg *Segment) Indexing(do func(string, int, int64, int64)) error {
+	return readlineIterator(seg.file, func(line string, pos int64) error {
+		if rec := record.Decode(line); rec != nil {
+			do(rec.Key, seg.Id, pos, pos+int64(len(line))+1)
+			return nil
 		}
-		if err != nil {
-			return err
-		}
-
-		rec := decode(line)
-		if rec != nil {
-			_, exists := cache[rec.key]
-			if !exists {
-				cache[rec.key] = newIdxRecord(rec.key, seg, pos, pos+int64(len(line))+1)
-			}
-		}
-	}
-
-	return nil
+		return fmt.Errorf("unable to decode line: %q", line)
+	})
 }
 
-func (seg *segment) close() {
+func (seg *Segment) Close() {
 	seg.file.Close()
 }
 
@@ -161,7 +143,7 @@ func (seg *segment) close() {
 // LEGACY CODE
 // ==============================================================
 
-func (seg *segment) search(key string) (bool, string, error) {
+func (seg *Segment) Search(key string) (bool, string, error) {
 
 	revReader, err := fs.NewReverseReader(seg.file)
 	if err != nil {
@@ -178,9 +160,9 @@ func (seg *segment) search(key string) (bool, string, error) {
 			return false, "", err
 		}
 
-		rec := decode(line)
-		if rec != nil && rec.key == key {
-			return true, rec.value, nil
+		rec := record.Decode(line)
+		if rec != nil && rec.Key == key {
+			return true, rec.Value, nil
 		}
 	}
 	return false, "", nil

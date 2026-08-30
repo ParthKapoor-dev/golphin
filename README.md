@@ -9,6 +9,7 @@ This is a project, where i try to build a db from scratch in goLang. my aim? to 
 3. segmenations
 4. Compaction (file replacement based)
 5. CI
+6. Indexing & Snapshots
 
 ## How to run this project 
 - ./golphin set key value
@@ -18,7 +19,10 @@ This is a project, where i try to build a db from scratch in goLang. my aim? to 
 
 ## ROADMAP
 1. dont know yet.
-2. Working on Indexing now: I'll start with creating the index on every run, and then optimize this by saving snapshot in a tmp file
+2. [DONE] Working on Indexing now: I'll start with creating the index on every run, and then optimize this by saving snapshot in a tmp file
+3. TUI for state to live in memory; currently cli makes the memory 
+4. Create a daemon (background running service), like a server maybe -- note this is postgres
+5. How does sqlite works? its serverless u know.
 
 ## References
 1. https://www.nan.fyi/database

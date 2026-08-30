@@ -1,24 +1,24 @@
-package storage
+package record
 
 import "strings"
 
 type Record struct {
-	key   string
-	value string
-	entry string
-	chunk []byte
+	Key   string
+	Value string
+	Entry string
+	Chunk []byte
 }
 
-const tombstone = "\000"
+const Tombstone = "\000"
 
-func encode(key, value string) *Record {
+func Encode(key, value string) *Record {
 
 	entry := key + ":" + value + "\n"
 	chunk := []byte(entry)
 	return &Record{key, value, entry, chunk}
 }
 
-func decode(line string) *Record {
+func Decode(line string) *Record {
 	line = strings.TrimSuffix(line, "\n")
 	kv := strings.Split(line, ":")
 
@@ -27,9 +27,9 @@ func decode(line string) *Record {
 	}
 
 	return &Record{
-		key:   kv[0],
-		value: kv[1],
-		entry: line,
+		Key:   kv[0],
+		Value: kv[1],
+		Entry: line,
 	}
 
 }

@@ -2,116 +2,47 @@ package storage
 
 import (
 	"cmp"
-	"errors"
 	"fmt"
-	"io"
 	"os"
 	"slices"
 	"strconv"
 	"strings"
 
-	"github.com/parthkapoor-dev/golphin/internal/fs"
+	record "github.com/parthkapoor-dev/golphin/internal/storage/record"
+	sg "github.com/parthkapoor-dev/golphin/internal/storage/segment"
 )
 
 type Db struct {
-	segments             []*segment
+	segments             []*sg.Segment
 	maxRecordsPerSegment int
 	dirPath              string
 	size                 int
-	idxCache             map[string]*IdxRecord
+	idxCache             map[string]*location
 }
 
 func (db *Db) initIndexing() error {
 
-	db.idxCache = make(map[string]*IdxRecord)
+	db.idxCache = make(map[string]*location)
 
-	filePath := db.dirPath + "/_snapshot.txt"
-	snapFile, err := os.Open(filePath)
-	if errors.Is(err, os.ErrNotExist) {
+	err := readSnapshot(db.dirPath, db.idxCache)
+
+	// snapshot didn't exist
+	if err != nil {
 
 		size := len(db.segments)
 		for i := size - 1; i >= 0; i-- {
-			if err := db.segments[i].indexing(db.idxCache); err != nil {
+			if err := db.segments[i].Indexing(func(key string, segId int, start, end int64) {
+				_, exists := db.idxCache[key]
+				if !exists {
+					db.idxCache[key] = newLocation(key, segId, start, end)
+				}
+			}); err != nil {
 				return err
 			}
 		}
-
-		return nil
-	}
-
-	if err != nil {
-		return err
-	}
-	defer snapFile.Close()
-
-	revReader, err := fs.NewReverseReader(snapFile)
-	if err != nil {
-		return err
-	}
-	defer revReader.Close()
-
-	for {
-		line, _, err := revReader.ReadLine()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		rec := strings.Split(line, ":")
-		if len(rec) == 4 {
-			key := rec[0]
-
-			segId, err := strconv.Atoi(rec[1])
-			if err != nil {
-				return err
-			}
-
-			// TODO: this would fail later on.
-			if len(db.segments) > segId {
-				return fmt.Errorf("Incorrect segId")
-			}
-			seg := db.segments[segId-1]
-
-			start, err := strconv.ParseInt(rec[2], 10, 64)
-			if err != nil {
-				return err
-			}
-
-			end, err := strconv.ParseInt(rec[3], 10, 64)
-			if err != nil {
-				return err
-			}
-
-			db.idxCache[key] = newIdxRecord(key, seg, start, end)
-
-		}
-	}
-
-	if err := os.Remove(filePath); err != nil {
-		return err
 	}
 
 	return nil
-}
-
-func (db *Db) snapshot() error {
-
-	filePath := db.dirPath + "/_snapshot.txt"
-	snapFile, err := fs.EnsureFile(filePath)
-	if err != nil {
-		return err
-	}
-	defer snapFile.Close()
-
-	for key, rec := range db.idxCache {
-		chunk := []byte(key + ":" + strconv.Itoa(rec.segment.id) + ":" + strconv.FormatInt(rec.start, 10) + ":" + strconv.FormatInt(rec.end, 10) + "\n")
-		fs.WriteChunk(snapFile, chunk)
-	}
-
-	return nil
-
 }
 
 func (db *Db) compact() error {
@@ -120,7 +51,7 @@ func (db *Db) compact() error {
 
 	size := len(db.segments)
 	for i := size - 1; i >= 0; i-- {
-		if err := db.segments[i].compact(cache); err != nil {
+		if err := db.segments[i].Compact(cache); err != nil {
 			return err
 		}
 	}
@@ -132,13 +63,13 @@ func (db *Db) compact() error {
 	return nil
 }
 
-func (db *Db) addSegment() (*segment, error) {
+func (db *Db) addSegment() (*sg.Segment, error) {
 	size := len(db.segments)
 	// TODO: fix this hardcoded way for the next file name
 	newIdx := size + 1
 	filepath := db.dirPath + "/" + strconv.Itoa(newIdx) + ".txt"
 
-	seg, err := newSegment(newIdx, filepath)
+	seg, err := sg.NewSegment(newIdx, filepath)
 	if err != nil {
 		return nil, err
 	}
@@ -147,10 +78,10 @@ func (db *Db) addSegment() (*segment, error) {
 	return seg, err
 }
 
-func (db *Db) getSegment() (*segment, error) {
+func (db *Db) getSegment() (*sg.Segment, error) {
 	size := len(db.segments)
 	var seg = db.segments[size-1]
-	if seg.count >= db.maxRecordsPerSegment {
+	if seg.Count >= db.maxRecordsPerSegment {
 		// TODO: make this bg process; so here we just invoke compaction
 		if err := db.compact(); err != nil {
 			return nil, err
@@ -167,7 +98,7 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 		return nil, fmt.Errorf("unable to read dir %q: %w", dirPath, err)
 	}
 
-	var segments []*segment
+	var segments []*sg.Segment
 
 	for _, file := range files {
 		if !file.IsDir() && strings.Contains(file.Name(), ".txt") && file.Name() != "_snapshot.txt" {
@@ -178,7 +109,7 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 				return nil, fmt.Errorf("get fileId: %w", err)
 			}
 
-			seg, err := newSegment(fileId, filepath)
+			seg, err := sg.NewSegment(fileId, filepath)
 			if err != nil {
 				return nil, err
 			}
@@ -187,12 +118,12 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 		}
 	}
 
-	slices.SortFunc(segments, func(a, b *segment) int {
-		return cmp.Compare(a.id, b.id)
+	slices.SortFunc(segments, func(a, b *sg.Segment) int {
+		return cmp.Compare(a.Id, b.Id)
 	})
 
 	size := 0
-	var idxCache map[string]*IdxRecord
+	var idxCache map[string]*location
 	idxCache = nil
 
 	db := &Db{
@@ -219,48 +150,30 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 func (db *Db) GetSize() (int, error) {
 	var count = 0
 	for _, seg := range db.segments {
-		count += seg.count
+		count += seg.Count
 	}
 	return count, nil
 }
 
 func (db *Db) Get(key string) (bool, string, error) {
 
-	idxRec, exists := db.idxCache[key]
+	loc, exists := db.idxCache[key]
 	if !exists {
 		return false, "", nil
 	}
 
-	found, value, err := idxRec.segment.get(idxRec)
+	// TODO: need to fix this with a map of segments
+	seg := db.segments[loc.segId-1]
+
+	found, value, err := seg.Get(loc.start, loc.end)
 	if err != nil {
 		return false, "", err
 	}
-	if !found || value == tombstone {
+	if !found || value == record.Tombstone {
 		return false, "", nil
 	}
 
 	return true, value, nil
-}
-
-func (db *Db) legacyGet(key string) (bool, string, error) {
-
-	size := len(db.segments)
-
-	for i := size - 1; i >= 0; i-- {
-		found, value, err := db.segments[i].search(key)
-		if err != nil {
-			return false, "", err
-		}
-		if !found {
-			continue
-		}
-		if value == tombstone {
-			return false, "", nil
-		}
-		return true, value, nil
-	}
-
-	return false, "", nil
 }
 
 func (db *Db) Set(key string, value string) error {
@@ -269,12 +182,12 @@ func (db *Db) Set(key string, value string) error {
 		return err
 	}
 
-	start, end, err := seg.upsert(key, value)
+	start, end, err := seg.Upsert(key, value)
 	if err != nil {
 		return err
 	}
 
-	db.idxCache[key] = newIdxRecord(key, seg, start, end)
+	db.idxCache[key] = newLocation(key, seg.Id, start, end)
 
 	return nil
 }
@@ -285,7 +198,7 @@ func (db *Db) Delete(key string) error {
 		return err
 	}
 
-	if _, _, err = seg.delete(key); err != nil {
+	if _, _, err = seg.Delete(key); err != nil {
 		return err
 	}
 
@@ -297,9 +210,34 @@ func (db *Db) Delete(key string) error {
 
 func (db *Db) Close() {
 
-	db.snapshot()
+	writeSnapshot(db.dirPath, db.idxCache)
 
 	for _, seg := range db.segments {
-		seg.close()
+		seg.Close()
 	}
+}
+
+// ==============================================================
+// LEGACY CODE
+// ==============================================================
+
+func (db *Db) legacyGet(key string) (bool, string, error) {
+
+	size := len(db.segments)
+
+	for i := size - 1; i >= 0; i-- {
+		found, value, err := db.segments[i].Search(key)
+		if err != nil {
+			return false, "", err
+		}
+		if !found {
+			continue
+		}
+		if value == record.Tombstone {
+			return false, "", nil
+		}
+		return true, value, nil
+	}
+
+	return false, "", nil
 }

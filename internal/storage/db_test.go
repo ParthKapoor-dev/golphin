@@ -9,7 +9,14 @@ import (
 	"github.com/parthkapoor-dev/golphin/internal/storage"
 )
 
-func newTestDB(t *testing.T, maxRecords int) *storage.Db {
+type testingCtx interface {
+	Helper()
+	Fatalf(format string, args ...any)
+	Cleanup(func())
+	TempDir() string
+}
+
+func newTestDB(t testingCtx, maxRecords int) *storage.Db {
 
 	// t.tempDir --> that exists during testing
 	db, err := storage.GetDB(t.TempDir(), maxRecords)
@@ -22,7 +29,7 @@ func newTestDB(t *testing.T, maxRecords int) *storage.Db {
 	return db
 }
 
-func requireValue(t *testing.T, db *storage.Db, key string, value string) {
+func requireValue(t testingCtx, db *storage.Db, key string, value string) {
 	t.Helper()
 
 	found, got, err := db.Get(key)
@@ -38,7 +45,7 @@ func requireValue(t *testing.T, db *storage.Db, key string, value string) {
 
 }
 
-func requireMissing(t *testing.T, db *storage.Db, key string) {
+func requireMissing(t testingCtx, db *storage.Db, key string) {
 	t.Helper()
 
 	found, value, err := db.Get(key)
@@ -205,11 +212,7 @@ func TestRandomDataAndCompaction(t *testing.T) {
 
 func BenchmarkGetOldest(b *testing.B) {
 
-	db, err := storage.GetDB(b.TempDir(), 10_001)
-	if err != nil {
-		b.Fatal(err)
-	}
-	defer db.Close()
+	db := newTestDB(b, 3)
 
 	for i := range 10_001 {
 		key := fmt.Sprintf("key-%d", i)
@@ -223,6 +226,61 @@ func BenchmarkGetOldest(b *testing.B) {
 		if _, _, err := db.Get("key-0"); err != nil {
 			b.Fatal(err)
 		}
+	}
+
+}
+
+func BenchmarkRandomDataGetAndDelete(b *testing.B) {
+
+	db := newTestDB(b, 3)
+
+	cache := make(map[string]string)
+	maxKey := 10
+
+	for i := range 1000 {
+		key := strconv.Itoa(rand.Intn(maxKey))
+		value := strconv.Itoa(rand.Intn(10 * maxKey))
+
+		_, exists := cache[key]
+
+		if i%2 == 0 && exists {
+			err := db.Delete(key)
+			if err != nil {
+				b.Fatalf("Delete() error: %v", err)
+			}
+			delete(cache, key)
+		} else {
+			err := db.Set(key, value)
+			if err != nil {
+				b.Fatalf("Set() error: %v", err)
+			}
+			cache[key] = value
+		}
+	}
+
+	b.ResetTimer()
+
+	for b.Loop() {
+
+		for i := range maxKey {
+			key := strconv.Itoa(i)
+			value, ok := cache[key]
+			if ok {
+				requireValue(b, db, key, value)
+			} else {
+				requireMissing(b, db, key)
+
+			}
+		}
+	}
+
+	dbCnt, err := db.GetSize()
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	if dbCnt > len(cache)+1 {
+		b.Fatal("compaction failed!")
 	}
 
 }
