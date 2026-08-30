@@ -1,7 +1,6 @@
 package segment
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -22,16 +21,9 @@ func NewSegment(fileId int, filepath string) (*Segment, error) {
 		return nil, err
 	}
 
-	lineCount := 0
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		lineCount++
-	}
-
-	if err := scanner.Err(); err != nil {
-		file.Close()
-		return nil, fmt.Errorf("Unable to count records in file %q: %w", filepath, err)
+	lineCount, err := fs.GetLineCount(file)
+	if err != nil {
+		return nil, fmt.Errorf("file: %q", fileId)
 	}
 
 	return &Segment{
@@ -88,28 +80,20 @@ func (seg *Segment) Compact(cache map[string]bool) error {
 
 	var skips []fs.Skip
 
-	revReader, err := fs.NewReverseReader(seg.file)
-	if err != nil {
-		return err
-	}
-	defer revReader.Close()
-
-	for {
-		line, pos, err := revReader.ReadLine()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
+	if err := seg.readlineIterator(func(line string, pos int64) error {
 		rec := record.Decode(line)
-		if rec != nil {
-			if cache[rec.Key] || rec.Value == record.Tombstone {
-				skips = append(skips, fs.Skip{Start: pos, End: pos + int64(len(line)) + 1})
-			}
-			cache[rec.Key] = true
+		if rec == nil {
+			return fmt.Errorf("decode failed for line: %q", line)
 		}
+
+		if cache[rec.Key] || rec.Value == record.Tombstone {
+			skips = append(skips, fs.Skip{Start: pos, End: pos + int64(len(line)) + 1})
+		}
+		cache[rec.Key] = true
+
+		return nil
+	}); err != nil {
+		return err
 	}
 
 	if len(skips) != 0 {
@@ -126,7 +110,7 @@ func (seg *Segment) Compact(cache map[string]bool) error {
 }
 
 func (seg *Segment) Indexing(do func(string, int, int64, int64)) error {
-	return readlineIterator(seg.file, func(line string, pos int64) error {
+	return seg.readlineIterator(func(line string, pos int64) error {
 		if rec := record.Decode(line); rec != nil {
 			do(rec.Key, seg.Id, pos, pos+int64(len(line))+1)
 			return nil

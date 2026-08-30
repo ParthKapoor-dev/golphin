@@ -26,9 +26,7 @@ func (db *Db) initIndexing() error {
 
 	err := readSnapshot(db.dirPath, db.idxCache)
 
-	// snapshot didn't exist
 	if err != nil {
-
 		size := len(db.segments)
 		for i := size - 1; i >= 0; i-- {
 			if err := db.segments[i].Indexing(func(key string, segId int, start, end int64) {
@@ -41,7 +39,6 @@ func (db *Db) initIndexing() error {
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -202,7 +199,6 @@ func (db *Db) Delete(key string) error {
 		return err
 	}
 
-	// db.idxCache[key] = newIdxRecord(key, seg, start, end)
 	delete(db.idxCache, key)
 
 	return nil

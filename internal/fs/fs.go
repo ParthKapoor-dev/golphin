@@ -1,6 +1,7 @@
 package fs
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -47,4 +48,21 @@ func WriteChunk(file *os.File, entry []byte) (int64, int64, error) {
 	endPtr := startPtr + int64(n)
 
 	return startPtr, endPtr, nil
+}
+
+func GetLineCount(file *os.File) (int, error) {
+
+	lineCount := 0
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		lineCount++
+	}
+
+	if err := scanner.Err(); err != nil {
+		file.Close()
+		return 0, fmt.Errorf("count records: %w", err)
+	}
+
+	return lineCount, nil
 }

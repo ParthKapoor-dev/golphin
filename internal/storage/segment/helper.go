@@ -2,14 +2,13 @@ package segment
 
 import (
 	"io"
-	"os"
 
 	"github.com/parthkapoor-dev/golphin/internal/fs"
 )
 
-func readlineIterator(file *os.File, do func(line string, pos int64) error) error {
+func (seg *Segment) readlineIterator(do func(line string, pos int64) error) error {
 
-	revReader, err := fs.NewReverseReader(file)
+	revReader, err := fs.NewReverseReader(seg.file)
 	if err != nil {
 		return err
 	}
