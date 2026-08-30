@@ -33,9 +33,16 @@ func (r *ReverseReader) ReadLine() (string, int64, error) {
 
 	for {
 
-		// found the new line, return now
-		for i := len(r.buf) - 1; i >= 0; i-- {
+		// check for new line at every byte in buffer in reverse
+		bufSize := len(r.buf)
+		for i := bufSize - 1; i >= 0; i-- {
+			// found the new line, return now
+			// the new line shouldn't be the last `\n`; coz that will return empty line
 			if r.buf[i] == '\n' {
+				if i+1 == bufSize {
+					r.buf = r.buf[:i]
+					continue
+				}
 				line := r.buf[i+1:]
 				r.buf = r.buf[:i]
 				startPos := r.pos + int64(i+1)
@@ -45,8 +52,7 @@ func (r *ReverseReader) ReadLine() (string, int64, error) {
 		}
 		// the buffer didn't have newline
 
-		// if postion is 0, and buffer is empty
-		// meaning we are beginning of the file
+		// if postion is 0: meaning we are beginning of the file
 		if r.pos == 0 {
 			// no chunk for us to fetch
 			if len(r.buf) == 0 {
