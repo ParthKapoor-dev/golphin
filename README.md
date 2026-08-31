@@ -3,6 +3,8 @@
 
 This is a project, where i try to build a db from scratch in goLang. my aim? to build postgreSQL; ohh u mean realistically? to reach as near as possible to sqlite. 
 
+Benchmarks: [/dev/bench](https://parthkapoor-dev.github.io/golphin/dev/bench/)
+
 ## Whats done? 
 1. Append only upserting / deletion
 2. greedily searching for key in reverse

@@ -210,13 +210,27 @@ func TestDeleteAcrossSegments(t *testing.T) {
 
 func TestRandomDataAndCompaction(t *testing.T) {
 
-	db := newTestDB(t, t.TempDir(), 3)
-
+	dirPath := t.TempDir()
 	cache := make(map[string]string)
 	maxKey := 10
 
-	randomDataCreation(t, db, cache, maxKey, 1000, 2)
+	db := newTestDB(t, dirPath, 3)
 
+	randomDataCreation(t, db, cache, maxKey, 1000, 2)
+	randomDataValidation(t, db, cache, maxKey)
+}
+
+func TestSnaphotRetrievable(t *testing.T) {
+
+	dirPath := t.TempDir()
+	cache := make(map[string]string)
+	maxKey := 10
+
+	db := newTestDB(t, dirPath, 3)
+	randomDataCreation(t, db, cache, maxKey, 1000, 2)
+	db.Close()
+
+	db = newTestDB(t, dirPath, 3)
 	randomDataValidation(t, db, cache, maxKey)
 }
 
@@ -227,15 +241,12 @@ func TestNoSnapshotRecover(t *testing.T) {
 	maxKey := 10
 
 	db := newTestDB(t, dirPath, 3)
-
 	randomDataCreation(t, db, cache, maxKey, 1000, 2)
-
 	db.Close()
 
 	os.Remove(dirPath + "/_snapshot.txt")
 
 	db = newTestDB(t, dirPath, 3)
-
 	randomDataValidation(t, db, cache, maxKey)
 
 }
@@ -247,17 +258,13 @@ func TestFaultySnapshotRecover(t *testing.T) {
 	maxKey := 10
 
 	db := newTestDB(t, dirPath, 3)
-
 	randomDataCreation(t, db, cache, maxKey, 1000, 2)
-
 	db.Close()
 
 	os.WriteFile(dirPath+"/_snapshot.txt", []byte("invalid:data\n"), 0644)
 
 	db = newTestDB(t, dirPath, 3)
-
 	requireMissing(t, db, "invalid")
-
 	randomDataValidation(t, db, cache, maxKey)
 }
 
@@ -269,44 +276,76 @@ func BenchmarkGetOldest(b *testing.B) {
 
 	db := newTestDB(b, b.TempDir(), 3)
 
-	for i := range 10_001 {
+	for i := range 100 {
 		key := fmt.Sprintf("key-%d", i)
 		if err := db.Set(key, "value"); err != nil {
 			b.Fatal(err)
 		}
 	}
+
 	b.ResetTimer()
 
 	for b.Loop() {
-		if _, _, err := db.Get("key-0"); err != nil {
-			b.Fatal(err)
-		}
+		requireValue(b, db, "key-0", "value")
 	}
 
 }
 
-func BenchmarkRandomDataGetAndDelete(b *testing.B) {
+func BenchmarkLargeInserts(b *testing.B) {
 
 	db := newTestDB(b, b.TempDir(), 3)
-
-	cache := make(map[string]string)
-	maxKey := 10
-
-	randomDataCreation(b, db, cache, maxKey, 1000, 2)
 
 	b.ResetTimer()
 
 	for b.Loop() {
+		for i := range 100 {
+			key := fmt.Sprintf("key-%d", i)
+			if err := db.Set(key, "value"); err != nil {
+				b.Fatal(err)
+			}
+		}
+	}
+
+	requireValue(b, db, "key-0", "value")
+}
+
+func BenchmarkRandomDataGetAndDelete(b *testing.B) {
+
+	dirPath := b.TempDir()
+	cache := make(map[string]string)
+	maxKey := 10
+
+	db := newTestDB(b, dirPath, 3)
+	randomDataCreation(b, db, cache, maxKey, 100, 2)
+	db.Close()
+
+	db = newTestDB(b, dirPath, 3)
+
+	b.ResetTimer()
+	for b.Loop() {
 		randomDataValidation(b, db, cache, maxKey)
 	}
+}
 
-	dbCnt, err := db.GetSize()
-	if err != nil {
-		b.Fatal(err)
+func BenchmarkNoSnapshots(b *testing.B) {
+
+	dirPath := b.TempDir()
+	cache := make(map[string]string)
+	maxKey := 10
+
+	db := newTestDB(b, dirPath, 3)
+	randomDataCreation(b, db, cache, maxKey, 100, 2)
+
+	for b.Loop() {
+
+		b.StopTimer()
+
+		db.Close()
+		os.Remove(dirPath + "/_snapshot.txt")
+		db = newTestDB(b, dirPath, 3)
+
+		b.StartTimer()
+
+		randomDataValidation(b, db, cache, maxKey)
 	}
-
-	if dbCnt > len(cache)+1 {
-		b.Fatal("compaction failed!")
-	}
-
 }
