@@ -208,6 +208,9 @@ func TestRandomDataAndCompaction(t *testing.T) {
 
 }
 
+// Test cases to check:
+// 1. Make sure for any issue in snapshot, we are correctly rebuilding the cache
+
 // benchmarking
 
 func BenchmarkGetOldest(b *testing.B) {

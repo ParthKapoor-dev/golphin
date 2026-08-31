@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-// Idempotent: get or create file
+// Idempotent: get or create append file
 func EnsureFile(filePath string) (*os.File, error) {
 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {

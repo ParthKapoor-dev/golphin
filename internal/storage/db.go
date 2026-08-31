@@ -20,23 +20,35 @@ type Db struct {
 	idxCache             map[string]*location
 }
 
-func (db *Db) initIndexing() error {
+func (db *Db) buildIndex() error {
+
+	db.idxCache = make(map[string]*location)
+	size := len(db.segments)
+	for i := size - 1; i >= 0; i-- {
+		if err := db.segments[i].Indexing(func(key string, segId int, start, end int64) {
+			_, exists := db.idxCache[key]
+			if !exists {
+				db.idxCache[key] = newLocation(key, segId, start, end)
+			}
+		}); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (db *Db) initIndex() error {
 
 	db.idxCache = make(map[string]*location)
 
-	err := readSnapshot(db.dirPath, db.idxCache)
+	err := db.readSnapshot()
 
 	if err != nil {
-		size := len(db.segments)
-		for i := size - 1; i >= 0; i-- {
-			if err := db.segments[i].Indexing(func(key string, segId int, start, end int64) {
-				_, exists := db.idxCache[key]
-				if !exists {
-					db.idxCache[key] = newLocation(key, segId, start, end)
-				}
-			}); err != nil {
-				return err
-			}
+		// TODO: make sure snapshot file is deleted
+
+		if err := db.buildIndex(); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -53,7 +65,7 @@ func (db *Db) compact() error {
 		}
 	}
 
-	if err := db.initIndexing(); err != nil {
+	if err := db.buildIndex(); err != nil {
 		return err
 	}
 
@@ -75,7 +87,8 @@ func (db *Db) addSegment() (*sg.Segment, error) {
 	return seg, err
 }
 
-func (db *Db) getSegment() (*sg.Segment, error) {
+// Idempotent: Get or Create New Segment
+func (db *Db) ensureSegment() (*sg.Segment, error) {
 	size := len(db.segments)
 	var seg = db.segments[size-1]
 	if seg.Count >= db.maxRecordsPerSegment {
@@ -131,7 +144,7 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 		idxCache,
 	}
 
-	if err := db.initIndexing(); err != nil {
+	if err := db.initIndex(); err != nil {
 		return nil, err
 	}
 
@@ -174,7 +187,7 @@ func (db *Db) Get(key string) (bool, string, error) {
 }
 
 func (db *Db) Set(key string, value string) error {
-	seg, err := db.getSegment()
+	seg, err := db.ensureSegment()
 	if err != nil {
 		return err
 	}
@@ -190,7 +203,7 @@ func (db *Db) Set(key string, value string) error {
 }
 
 func (db *Db) Delete(key string) error {
-	seg, err := db.getSegment()
+	seg, err := db.ensureSegment()
 	if err != nil {
 		return err
 	}
@@ -206,7 +219,7 @@ func (db *Db) Delete(key string) error {
 
 func (db *Db) Close() {
 
-	writeSnapshot(db.dirPath, db.idxCache)
+	db.writeSnapshot()
 
 	for _, seg := range db.segments {
 		seg.Close()

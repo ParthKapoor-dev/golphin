@@ -9,7 +9,6 @@ import (
 // From now on, this files represent Index, not an indexed record
 // this is not a layer but helper for store
 
-// an indexed record
 type location struct {
 	key   string
 	segId int
