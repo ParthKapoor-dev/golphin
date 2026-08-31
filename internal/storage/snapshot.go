@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"io"
 	"os"
 
@@ -8,30 +9,35 @@ import (
 )
 
 const snapshotFileName = "_snapshot.txt"
+const snapMarker = "**MARKER**"
 
-func writeSnapshot(dirPath string, cache map[string]*location) error {
+func (db *Db) writeSnapshot() error {
 
-	filePath := dirPath + "/" + snapshotFileName
+	filePath := db.dirPath + "/" + snapshotFileName
 	snapFile, err := fs.EnsureFile(filePath)
 	if err != nil {
 		return err
 	}
 	defer snapFile.Close()
 
-	for _, loc := range cache {
+	for _, loc := range db.idxCache {
 		chunk := loc.encodeIdx()
 		if _, _, err = fs.WriteChunk(snapFile, chunk); err != nil {
 			return err
 		}
 	}
 
-	return nil
+	// mark EOF to verify that snapshot was correctly created
+	if _, _, err = fs.WriteChunk(snapFile, []byte(snapMarker)); err != nil {
+		return err
+	}
 
+	return nil
 }
 
-func readSnapshot(dirPath string, cache map[string]*location) error {
+func (db *Db) readSnapshot() error {
 
-	filePath := dirPath + "/" + snapshotFileName
+	filePath := db.dirPath + "/" + snapshotFileName
 
 	snapFile, err := os.Open(filePath)
 	if err != nil {
@@ -45,6 +51,19 @@ func readSnapshot(dirPath string, cache map[string]*location) error {
 		return err
 	}
 	defer revReader.Close()
+
+	// verify the marker by reading the first line
+	line, _, err := revReader.ReadLine()
+	if err != nil {
+		if err == io.EOF {
+			return fmt.Errorf("snapshot is empty")
+		}
+		return err
+	}
+
+	if line != snapMarker {
+		return fmt.Errorf("snapshot marker not found")
+	}
 
 	for {
 		line, _, err := revReader.ReadLine()
@@ -61,11 +80,8 @@ func readSnapshot(dirPath string, cache map[string]*location) error {
 		}
 
 		// TODO: to check if segId exists
-		cache[loc.key] = loc
-	}
+		db.idxCache[loc.key] = loc
 
-	if err := os.Remove(filePath); err != nil {
-		return err
 	}
 
 	return nil
