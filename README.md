@@ -8,7 +8,7 @@ This is a project, where i try to build a db from scratch in goLang. my aim? to 
 2. greedily searching for key in reverse
 3. segmenations
 4. Compaction (file replacement based)
-5. CI
+5. CI (tests & benchmark tracking)
 6. Indexing & Snapshots
 
 ## How to run this project 

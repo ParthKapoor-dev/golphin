@@ -292,41 +292,12 @@ func BenchmarkRandomDataGetAndDelete(b *testing.B) {
 	cache := make(map[string]string)
 	maxKey := 10
 
-	for i := range 1000 {
-		key := strconv.Itoa(rand.Intn(maxKey))
-		value := strconv.Itoa(rand.Intn(10 * maxKey))
-
-		_, exists := cache[key]
-
-		if i%2 == 0 && exists {
-			err := db.Delete(key)
-			if err != nil {
-				b.Fatalf("Delete() error: %v", err)
-			}
-			delete(cache, key)
-		} else {
-			err := db.Set(key, value)
-			if err != nil {
-				b.Fatalf("Set() error: %v", err)
-			}
-			cache[key] = value
-		}
-	}
+	randomDataCreation(b, db, cache, maxKey, 1000, 2)
 
 	b.ResetTimer()
 
 	for b.Loop() {
-
-		for i := range maxKey {
-			key := strconv.Itoa(i)
-			value, ok := cache[key]
-			if ok {
-				requireValue(b, db, key, value)
-			} else {
-				requireMissing(b, db, key)
-
-			}
-		}
+		randomDataValidation(b, db, cache, maxKey)
 	}
 
 	dbCnt, err := db.GetSize()

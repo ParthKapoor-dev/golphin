@@ -1,0 +1,42 @@
+name: Go benchmark tracking
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  benchmark:
+    name: Run go benchmarks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: check out repo
+        uses: actions/checkout@v4
+
+      - name: setup go env
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+          cache: true
+
+      - name: Install deps
+        run: go mod download
+
+      - name: Run benchmarks
+        run: go test ./... -bench=. -benchmem -count=3 -run=^$ | tee output.txt
+
+      - name: Store benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        with:
+          name: Go Benchmarks
+          tool: go
+          output-file-path: output.txt
+
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
+
+          # Don't fail CI for benchmark regressions yet.
+          fail-on-alert: false
