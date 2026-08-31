@@ -52,7 +52,7 @@ func (db *Db) readSnapshot() error {
 	}
 	defer revReader.Close()
 
-	// verify the marker by reading the first line
+	// verify the EOF marker by reading the last line
 	line, _, err := revReader.ReadLine()
 	if err != nil {
 		if err == io.EOF {

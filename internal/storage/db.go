@@ -20,6 +20,10 @@ type Db struct {
 	idxCache             map[string]*location
 }
 
+// ======================================================
+// HELPERS
+// ======================================================
+
 func (db *Db) buildIndex() error {
 
 	db.idxCache = make(map[string]*location)
@@ -100,6 +104,10 @@ func (db *Db) ensureSegment() (*sg.Segment, error) {
 	}
 	return seg, nil
 }
+
+// ======================================================
+// HELPERS
+// ======================================================
 
 func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 
@@ -224,29 +232,4 @@ func (db *Db) Close() {
 	for _, seg := range db.segments {
 		seg.Close()
 	}
-}
-
-// ==============================================================
-// LEGACY CODE
-// ==============================================================
-
-func (db *Db) legacyGet(key string) (bool, string, error) {
-
-	size := len(db.segments)
-
-	for i := size - 1; i >= 0; i-- {
-		found, value, err := db.segments[i].Search(key)
-		if err != nil {
-			return false, "", err
-		}
-		if !found {
-			continue
-		}
-		if value == record.Tombstone {
-			return false, "", nil
-		}
-		return true, value, nil
-	}
-
-	return false, "", nil
 }
