@@ -106,7 +106,7 @@ func (db *Db) ensureSegment() (*sg.Segment, error) {
 }
 
 // ======================================================
-// HELPERS
+// API
 // ======================================================
 
 func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
@@ -223,6 +223,36 @@ func (db *Db) Delete(key string) error {
 	delete(db.idxCache, key)
 
 	return nil
+}
+
+// Keys returns all keys between fromKey and toKey, exclusive.
+// NOTE: this is lexicographical search
+func (db *Db) GetInBetweenKeys(fromKey string, toKey string) ([]string, error) {
+
+	results := make([]string, 0)
+
+	for key, loc := range db.idxCache {
+
+		if key > fromKey && key < toKey {
+
+			// TODO: need to fix this with a map of segments
+			seg := db.segments[loc.segId-1]
+
+			found, value, err := seg.Get(loc.start, loc.end)
+			if err != nil {
+				return nil, err
+			}
+			if !found || value == record.Tombstone {
+				continue
+			}
+
+			results = append(results, value)
+		}
+	}
+
+	slices.Sort(results)
+
+	return results, nil
 }
 
 func (db *Db) Close() {

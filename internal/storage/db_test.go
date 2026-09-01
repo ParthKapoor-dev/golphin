@@ -268,6 +268,37 @@ func TestFaultySnapshotRecover(t *testing.T) {
 	randomDataValidation(t, db, cache, maxKey)
 }
 
+func TestGetBetweenKeys(t *testing.T) {
+
+	dirPath := t.TempDir()
+	db := newTestDB(t, dirPath, 3)
+
+	for i := range 100 {
+		key := fmt.Sprintf("key-%03d", i)
+		value := fmt.Sprintf("value-%d", i)
+		if err := db.Set(key, value); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	values, err := db.GetInBetweenKeys("key-020", "key-080")
+	if len(values) != 59 {
+		t.Fatalf("GetInBetweenKeys() count = %d, expected 59", len(values))
+	}
+
+	for i := 21; i < 80; i++ {
+		got := values[i-21]
+		expected := fmt.Sprintf("value-%d", i)
+		if err != nil {
+			t.Fatalf("Get() error: %v", err)
+		}
+		if got != expected {
+			t.Fatalf("Get() value = %q, expected %q", got, expected)
+		}
+	}
+
+}
+
 // ======================================================
 // BENCHMARKS
 // ======================================================
@@ -348,4 +379,42 @@ func BenchmarkNoSnapshots(b *testing.B) {
 
 		randomDataValidation(b, db, cache, maxKey)
 	}
+}
+
+func BenchmarkGetBetweenKeys(b *testing.B) {
+
+	dirPath := b.TempDir()
+	db := newTestDB(b, dirPath, 3)
+
+	for i := range 100 {
+		key := fmt.Sprintf("key-%03d", i)
+		value := fmt.Sprintf("value-%d", i)
+		if err := db.Set(key, value); err != nil {
+			b.Fatal(err)
+		}
+	}
+
+	var values []string
+	var err error
+
+	b.ResetTimer()
+	for b.Loop() {
+		values, err = db.GetInBetweenKeys("key-020", "key-080")
+	}
+
+	if len(values) != 59 {
+		b.Fatalf("GetInBetweenKeys() count = %d, expected 59", len(values))
+	}
+
+	for i := 21; i < 80; i++ {
+		got := values[i-21]
+		expected := fmt.Sprintf("value-%d", i)
+		if err != nil {
+			b.Fatalf("Get() error: %v", err)
+		}
+		if got != expected {
+			b.Fatalf("Get() value = %q, expected %q", got, expected)
+		}
+	}
+
 }
