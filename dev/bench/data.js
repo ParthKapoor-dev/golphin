@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788191107936,
+  "lastUpdate": 1788271990125,
   "repoUrl": "https://github.com/ParthKapoor-dev/golphin",
   "entries": {
     "Go Benchmarks": [
@@ -480,6 +480,390 @@ window.BENCHMARK_DATA = {
             "value": 36,
             "unit": "allocs/op",
             "extra": "60477 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "parthkapoor.coder@gmail.com",
+            "name": "Parth Kapoor",
+            "username": "ParthKapoor-dev"
+          },
+          "committer": {
+            "email": "parthkapoor.coder@gmail.com",
+            "name": "Parth Kapoor",
+            "username": "ParthKapoor-dev"
+          },
+          "distinct": true,
+          "id": "9340adfa7a256e395ca09cfa53e4238cb02ae0a0",
+          "message": "feat,tests,bench(db): get data in between keys by brute force",
+          "timestamp": "2026-09-01T19:39:03+05:30",
+          "tree_id": "32b76284c28655c19ec2b58dc864c175cd12facb",
+          "url": "https://github.com/ParthKapoor-dev/golphin/commit/9340adfa7a256e395ca09cfa53e4238cb02ae0a0"
+        },
+        "date": 1788271989540,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkGetOldest",
+            "value": 1434,
+            "unit": "ns/op\t     144 B/op\t       4 allocs/op",
+            "extra": "843060 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest - ns/op",
+            "value": 1434,
+            "unit": "ns/op",
+            "extra": "843060 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest - B/op",
+            "value": 144,
+            "unit": "B/op",
+            "extra": "843060 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest - allocs/op",
+            "value": 4,
+            "unit": "allocs/op",
+            "extra": "843060 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest",
+            "value": 1433,
+            "unit": "ns/op\t     144 B/op\t       4 allocs/op",
+            "extra": "832573 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest - ns/op",
+            "value": 1433,
+            "unit": "ns/op",
+            "extra": "832573 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest - B/op",
+            "value": 144,
+            "unit": "B/op",
+            "extra": "832573 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest - allocs/op",
+            "value": 4,
+            "unit": "allocs/op",
+            "extra": "832573 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest",
+            "value": 1436,
+            "unit": "ns/op\t     144 B/op\t       4 allocs/op",
+            "extra": "787280 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest - ns/op",
+            "value": 1436,
+            "unit": "ns/op",
+            "extra": "787280 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest - B/op",
+            "value": 144,
+            "unit": "B/op",
+            "extra": "787280 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest - allocs/op",
+            "value": 4,
+            "unit": "allocs/op",
+            "extra": "787280 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts",
+            "value": 168594391,
+            "unit": "ns/op\t32551914 B/op\t  252948 allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts - ns/op",
+            "value": 168594391,
+            "unit": "ns/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts - B/op",
+            "value": 32551914,
+            "unit": "B/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts - allocs/op",
+            "value": 252948,
+            "unit": "allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts",
+            "value": 171436507,
+            "unit": "ns/op\t32554308 B/op\t  252960 allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts - ns/op",
+            "value": 171436507,
+            "unit": "ns/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts - B/op",
+            "value": 32554308,
+            "unit": "B/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts - allocs/op",
+            "value": 252960,
+            "unit": "allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts",
+            "value": 164522609,
+            "unit": "ns/op\t32554303 B/op\t  252959 allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts - ns/op",
+            "value": 164522609,
+            "unit": "ns/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts - B/op",
+            "value": 32554303,
+            "unit": "B/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts - allocs/op",
+            "value": 252959,
+            "unit": "allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete",
+            "value": 13108,
+            "unit": "ns/op\t    1104 B/op\t      36 allocs/op",
+            "extra": "91659 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete - ns/op",
+            "value": 13108,
+            "unit": "ns/op",
+            "extra": "91659 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete - B/op",
+            "value": 1104,
+            "unit": "B/op",
+            "extra": "91659 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete - allocs/op",
+            "value": 36,
+            "unit": "allocs/op",
+            "extra": "91659 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete",
+            "value": 9623,
+            "unit": "ns/op\t     736 B/op\t      24 allocs/op",
+            "extra": "125112 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete - ns/op",
+            "value": 9623,
+            "unit": "ns/op",
+            "extra": "125112 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete - B/op",
+            "value": 736,
+            "unit": "B/op",
+            "extra": "125112 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete - allocs/op",
+            "value": 24,
+            "unit": "allocs/op",
+            "extra": "125112 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete",
+            "value": 13188,
+            "unit": "ns/op\t    1104 B/op\t      36 allocs/op",
+            "extra": "90168 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete - ns/op",
+            "value": 13188,
+            "unit": "ns/op",
+            "extra": "90168 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete - B/op",
+            "value": 1104,
+            "unit": "B/op",
+            "extra": "90168 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete - allocs/op",
+            "value": 36,
+            "unit": "allocs/op",
+            "extra": "90168 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots",
+            "value": 12344,
+            "unit": "ns/op\t     496 B/op\t      16 allocs/op",
+            "extra": "94147 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots - ns/op",
+            "value": 12344,
+            "unit": "ns/op",
+            "extra": "94147 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots - B/op",
+            "value": 496,
+            "unit": "B/op",
+            "extra": "94147 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots - allocs/op",
+            "value": 16,
+            "unit": "allocs/op",
+            "extra": "94147 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots",
+            "value": 14117,
+            "unit": "ns/op\t     608 B/op\t      20 allocs/op",
+            "extra": "83895 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots - ns/op",
+            "value": 14117,
+            "unit": "ns/op",
+            "extra": "83895 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots - B/op",
+            "value": 608,
+            "unit": "B/op",
+            "extra": "83895 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots - allocs/op",
+            "value": 20,
+            "unit": "allocs/op",
+            "extra": "83895 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots",
+            "value": 14383,
+            "unit": "ns/op\t     624 B/op\t      20 allocs/op",
+            "extra": "83262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots - ns/op",
+            "value": 14383,
+            "unit": "ns/op",
+            "extra": "83262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots - B/op",
+            "value": 624,
+            "unit": "B/op",
+            "extra": "83262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots - allocs/op",
+            "value": 20,
+            "unit": "allocs/op",
+            "extra": "83262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys",
+            "value": 75940,
+            "unit": "ns/op\t   11600 B/op\t     243 allocs/op",
+            "extra": "15698 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys - ns/op",
+            "value": 75940,
+            "unit": "ns/op",
+            "extra": "15698 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys - B/op",
+            "value": 11600,
+            "unit": "B/op",
+            "extra": "15698 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys - allocs/op",
+            "value": 243,
+            "unit": "allocs/op",
+            "extra": "15698 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys",
+            "value": 75529,
+            "unit": "ns/op\t   11600 B/op\t     243 allocs/op",
+            "extra": "15896 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys - ns/op",
+            "value": 75529,
+            "unit": "ns/op",
+            "extra": "15896 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys - B/op",
+            "value": 11600,
+            "unit": "B/op",
+            "extra": "15896 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys - allocs/op",
+            "value": 243,
+            "unit": "allocs/op",
+            "extra": "15896 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys",
+            "value": 75333,
+            "unit": "ns/op\t   11600 B/op\t     243 allocs/op",
+            "extra": "15924 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys - ns/op",
+            "value": 75333,
+            "unit": "ns/op",
+            "extra": "15924 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys - B/op",
+            "value": 11600,
+            "unit": "B/op",
+            "extra": "15924 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys - allocs/op",
+            "value": 243,
+            "unit": "allocs/op",
+            "extra": "15924 times\n4 procs"
           }
         ]
       }
