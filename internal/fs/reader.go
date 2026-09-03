@@ -120,5 +120,4 @@ func (r *ReverseReader) DeleteLine(startPos int64, stringLen int) error {
 	return nil
 }
 
-func (r *ReverseReader) Close() {
-}
+func (r *ReverseReader) Close() {}

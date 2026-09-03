@@ -17,7 +17,7 @@ type Db struct {
 	maxRecordsPerSegment int
 	dirPath              string
 	size                 int
-	idxCache             map[string]*location
+	cache                index
 }
 
 // ======================================================
@@ -26,13 +26,13 @@ type Db struct {
 
 func (db *Db) buildIndex() error {
 
-	db.idxCache = make(map[string]*location)
+	db.cache = NewIndex()
 	size := len(db.segments)
 	for i := size - 1; i >= 0; i-- {
 		if err := db.segments[i].Indexing(func(key string, segId int, start, end int64) {
-			_, exists := db.idxCache[key]
+			_, exists := db.cache.get(key)
 			if !exists {
-				db.idxCache[key] = newLocation(key, segId, start, end)
+				db.cache.set(key, newLocation(key, segId, start, end))
 			}
 		}); err != nil {
 			return err
@@ -44,7 +44,7 @@ func (db *Db) buildIndex() error {
 
 func (db *Db) initIndex() error {
 
-	db.idxCache = make(map[string]*location)
+	db.cache = NewIndex()
 
 	err := db.readSnapshot()
 
@@ -141,15 +141,13 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	})
 
 	size := 0
-	var idxCache map[string]*location
-	idxCache = nil
 
 	db := &Db{
 		segments,
 		maxRecordsPerSegment,
 		dirPath,
 		size,
-		idxCache,
+		nil,
 	}
 
 	if err := db.initIndex(); err != nil {
@@ -175,7 +173,7 @@ func (db *Db) GetSize() (int, error) {
 
 func (db *Db) Get(key string) (bool, string, error) {
 
-	loc, exists := db.idxCache[key]
+	loc, exists := db.cache.get(key)
 	if !exists {
 		return false, "", nil
 	}
@@ -205,7 +203,7 @@ func (db *Db) Set(key string, value string) error {
 		return err
 	}
 
-	db.idxCache[key] = newLocation(key, seg.Id, start, end)
+	db.cache.set(key, newLocation(key, seg.Id, start, end))
 
 	return nil
 }
@@ -220,7 +218,7 @@ func (db *Db) Delete(key string) error {
 		return err
 	}
 
-	delete(db.idxCache, key)
+	db.cache.delete(key)
 
 	return nil
 }
@@ -231,7 +229,7 @@ func (db *Db) GetInBetweenKeys(fromKey string, toKey string) ([]string, error) {
 
 	results := make([]string, 0)
 
-	for key, loc := range db.idxCache {
+	for key, loc := range db.cache {
 
 		if key > fromKey && key < toKey {
 

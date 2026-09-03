@@ -20,7 +20,7 @@ func (db *Db) writeSnapshot() error {
 	}
 	defer snapFile.Close()
 
-	for _, loc := range db.idxCache {
+	for _, loc := range db.cache {
 		chunk := loc.encodeIdx()
 		if _, _, err = fs.WriteChunk(snapFile, chunk); err != nil {
 			return err
@@ -80,7 +80,7 @@ func (db *Db) readSnapshot() error {
 		}
 
 		// TODO: to check if segId exists
-		db.idxCache[loc.key] = loc
+		db.cache[loc.key] = loc
 
 	}
 

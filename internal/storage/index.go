@@ -6,9 +6,6 @@ import (
 	"strings"
 )
 
-// From now on, this files represent Index, not an indexed record
-// this is not a layer but helper for store
-
 type location struct {
 	key   string
 	segId int
@@ -52,4 +49,34 @@ func (loc *location) encodeIdx() []byte {
 		loc.key + ":" + strconv.Itoa(loc.segId) + ":" +
 			strconv.FormatInt(loc.start, 10) + ":" +
 			strconv.FormatInt(loc.end, 10) + "\n")
+}
+
+type index map[string]*location
+
+func NewIndex() index {
+	return make(index)
+}
+
+func (idx index) get(key string) (*location, bool) {
+	loc, exists := idx[key]
+	return loc, exists
+}
+
+func (idx index) set(key string, loc *location) {
+	idx[key] = loc
+}
+
+func (idx index) delete(key string) {
+	delete(idx, key)
+}
+
+func (idx index) iter(do func(*location) error) error {
+
+	for _, loc := range idx {
+		if err := do(loc); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
