@@ -109,7 +109,7 @@ func (seg *Segment) Compact(cache map[string]bool) error {
 	return nil
 }
 
-func (seg *Segment) Indexing(do func(string, int, int64, int64)) error {
+func (seg *Segment) Indexing(do func(string, int, int64, int64) error) error {
 	return seg.readlineIterator(func(line string, pos int64) error {
 		if rec := record.Decode(line); rec != nil {
 			do(rec.Key, seg.Id, pos, pos+int64(len(line))+1)

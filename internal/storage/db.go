@@ -29,11 +29,15 @@ func (db *Db) buildIndex() error {
 	db.cache = NewIndex()
 	size := len(db.segments)
 	for i := size - 1; i >= 0; i-- {
-		if err := db.segments[i].Indexing(func(key string, segId int, start, end int64) {
-			_, exists := db.cache.get(key)
+		if err := db.segments[i].Indexing(func(key string, segId int, start, end int64) error {
+			exists, _, err := db.cache.get(key)
+			if err != nil {
+				return err
+			}
 			if !exists {
 				db.cache.set(key, newLocation(key, segId, start, end))
 			}
+			return nil
 		}); err != nil {
 			return err
 		}
@@ -141,13 +145,14 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	})
 
 	size := 0
+	idx := NewIndex()
 
 	db := &Db{
 		segments,
 		maxRecordsPerSegment,
 		dirPath,
 		size,
-		nil,
+		idx,
 	}
 
 	if err := db.initIndex(); err != nil {
@@ -163,6 +168,7 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	return db, nil
 }
 
+// TODO: (HIGH) THIS IS WRONG.
 func (db *Db) GetSize() (int, error) {
 	var count = 0
 	for _, seg := range db.segments {
@@ -173,7 +179,10 @@ func (db *Db) GetSize() (int, error) {
 
 func (db *Db) Get(key string) (bool, string, error) {
 
-	loc, exists := db.cache.get(key)
+	exists, loc, err := db.cache.get(key)
+	if err != nil {
+		return false, "", err
+	}
 	if !exists {
 		return false, "", nil
 	}
@@ -227,25 +236,27 @@ func (db *Db) Delete(key string) error {
 // NOTE: this is lexicographical search
 func (db *Db) GetInBetweenKeys(fromKey string, toKey string) ([]string, error) {
 
+	locs, err := db.cache.between(fromKey, toKey)
+	if err != nil {
+		return nil, err
+	}
+
 	results := make([]string, 0)
 
-	for key, loc := range db.cache {
+	for _, loc := range locs {
 
-		if key > fromKey && key < toKey {
+		// TODO: need to fix this with a map of segments
+		seg := db.segments[loc.segId-1]
 
-			// TODO: need to fix this with a map of segments
-			seg := db.segments[loc.segId-1]
-
-			found, value, err := seg.Get(loc.start, loc.end)
-			if err != nil {
-				return nil, err
-			}
-			if !found || value == record.Tombstone {
-				continue
-			}
-
-			results = append(results, value)
+		found, value, err := seg.Get(loc.start, loc.end)
+		if err != nil {
+			return nil, err
 		}
+		if !found || value == record.Tombstone {
+			continue
+		}
+
+		results = append(results, value)
 	}
 
 	slices.Sort(results)

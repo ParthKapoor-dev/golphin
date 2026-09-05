@@ -4,7 +4,13 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/parthkapoor-dev/golphin/pkg/bst"
 )
+
+// ======================================================
+// SINGLE ENTRY LOCATION
+// ======================================================
 
 type location struct {
 	key   string
@@ -51,32 +57,35 @@ func (loc *location) encodeIdx() []byte {
 			strconv.FormatInt(loc.end, 10) + "\n")
 }
 
-type index map[string]*location
+// ======================================================
+// INDEX STORE
+// ======================================================
+
+type index struct {
+	bst *bst.BST[string, *location]
+}
 
 func NewIndex() index {
-	return make(index)
+	b := bst.NewBst[string, *location]()
+	return index{b}
 }
 
-func (idx index) get(key string) (*location, bool) {
-	loc, exists := idx[key]
-	return loc, exists
+func (idx index) get(key string) (bool, *location, error) {
+	return idx.bst.Find(key)
 }
 
-func (idx index) set(key string, loc *location) {
-	idx[key] = loc
+func (idx index) set(key string, loc *location) error {
+	return idx.bst.Upsert(key, loc)
 }
 
-func (idx index) delete(key string) {
-	delete(idx, key)
+func (idx index) delete(key string) error {
+	return idx.bst.Delete(key)
 }
 
-func (idx index) iter(do func(*location) error) error {
+func (idx index) between(from string, to string) ([]*location, error) {
+	return idx.bst.FindBetween(from, to)
+}
 
-	for _, loc := range idx {
-		if err := do(loc); err != nil {
-			return err
-		}
-	}
-
-	return nil
+func (idx index) iter() ([]*location, error) {
+	return idx.bst.Iter()
 }
