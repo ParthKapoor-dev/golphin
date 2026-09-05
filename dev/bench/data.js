@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788452084428,
+  "lastUpdate": 1788628488219,
   "repoUrl": "https://github.com/ParthKapoor-dev/golphin",
   "entries": {
     "Go Benchmarks": [
@@ -1248,6 +1248,606 @@ window.BENCHMARK_DATA = {
             "value": 243,
             "unit": "allocs/op",
             "extra": "29425 times\n4 procs"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "parthkapoor.coder@gmail.com",
+            "name": "Parth Kapoor",
+            "username": "ParthKapoor-dev"
+          },
+          "committer": {
+            "email": "parthkapoor.coder@gmail.com",
+            "name": "Parth Kapoor",
+            "username": "ParthKapoor-dev"
+          },
+          "distinct": true,
+          "id": "c87d7e070c8f39b25502eb4abe2c366b521c111b",
+          "message": "tests(bst): added basic & main tests",
+          "timestamp": "2026-09-05T22:41:33+05:30",
+          "tree_id": "aac625b28e70a4f60cfb2190869885411149c55c",
+          "url": "https://github.com/ParthKapoor-dev/golphin/commit/c87d7e070c8f39b25502eb4abe2c366b521c111b"
+        },
+        "date": 1788628487740,
+        "tool": "go",
+        "benches": [
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 1293,
+            "unit": "ns/op\t     144 B/op\t       4 allocs/op",
+            "extra": "943320 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 1293,
+            "unit": "ns/op",
+            "extra": "943320 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 144,
+            "unit": "B/op",
+            "extra": "943320 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 4,
+            "unit": "allocs/op",
+            "extra": "943320 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 1318,
+            "unit": "ns/op\t     144 B/op\t       4 allocs/op",
+            "extra": "886260 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 1318,
+            "unit": "ns/op",
+            "extra": "886260 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 144,
+            "unit": "B/op",
+            "extra": "886260 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 4,
+            "unit": "allocs/op",
+            "extra": "886260 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 1302,
+            "unit": "ns/op\t     144 B/op\t       4 allocs/op",
+            "extra": "776145 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 1302,
+            "unit": "ns/op",
+            "extra": "776145 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 144,
+            "unit": "B/op",
+            "extra": "776145 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 4,
+            "unit": "allocs/op",
+            "extra": "776145 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 115050554,
+            "unit": "ns/op\t32551862 B/op\t  252947 allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 115050554,
+            "unit": "ns/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 32551862,
+            "unit": "B/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 252947,
+            "unit": "allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 118118841,
+            "unit": "ns/op\t32554792 B/op\t  252962 allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 118118841,
+            "unit": "ns/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 32554792,
+            "unit": "B/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 252962,
+            "unit": "allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 117584343,
+            "unit": "ns/op\t32554711 B/op\t  252962 allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 117584343,
+            "unit": "ns/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 32554711,
+            "unit": "B/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 252962,
+            "unit": "allocs/op",
+            "extra": "100 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 8817,
+            "unit": "ns/op\t     736 B/op\t      24 allocs/op",
+            "extra": "134952 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 8817,
+            "unit": "ns/op",
+            "extra": "134952 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 736,
+            "unit": "B/op",
+            "extra": "134952 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 24,
+            "unit": "allocs/op",
+            "extra": "134952 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 11004,
+            "unit": "ns/op\t     981 B/op\t      32 allocs/op",
+            "extra": "107130 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 11004,
+            "unit": "ns/op",
+            "extra": "107130 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 981,
+            "unit": "B/op",
+            "extra": "107130 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 32,
+            "unit": "allocs/op",
+            "extra": "107130 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 11104,
+            "unit": "ns/op\t     981 B/op\t      32 allocs/op",
+            "extra": "107262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 11104,
+            "unit": "ns/op",
+            "extra": "107262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 981,
+            "unit": "B/op",
+            "extra": "107262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 32,
+            "unit": "allocs/op",
+            "extra": "107262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 20597,
+            "unit": "ns/op\t    1104 B/op\t      36 allocs/op",
+            "extra": "57823 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 20597,
+            "unit": "ns/op",
+            "extra": "57823 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 1104,
+            "unit": "B/op",
+            "extra": "57823 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 36,
+            "unit": "allocs/op",
+            "extra": "57823 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 15854,
+            "unit": "ns/op\t     736 B/op\t      24 allocs/op",
+            "extra": "80262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 15854,
+            "unit": "ns/op",
+            "extra": "80262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 736,
+            "unit": "B/op",
+            "extra": "80262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 24,
+            "unit": "allocs/op",
+            "extra": "80262 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 17512,
+            "unit": "ns/op\t     864 B/op\t      28 allocs/op",
+            "extra": "71695 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 17512,
+            "unit": "ns/op",
+            "extra": "71695 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 864,
+            "unit": "B/op",
+            "extra": "71695 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkNoSnapshots (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 28,
+            "unit": "allocs/op",
+            "extra": "71695 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 66952,
+            "unit": "ns/op\t   11600 B/op\t     243 allocs/op",
+            "extra": "17881 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 66952,
+            "unit": "ns/op",
+            "extra": "17881 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 11600,
+            "unit": "B/op",
+            "extra": "17881 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 243,
+            "unit": "allocs/op",
+            "extra": "17881 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 66894,
+            "unit": "ns/op\t   11600 B/op\t     243 allocs/op",
+            "extra": "18021 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 66894,
+            "unit": "ns/op",
+            "extra": "18021 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 11600,
+            "unit": "B/op",
+            "extra": "18021 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 243,
+            "unit": "allocs/op",
+            "extra": "18021 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage)",
+            "value": 66506,
+            "unit": "ns/op\t   11600 B/op\t     243 allocs/op",
+            "extra": "18087 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage) - ns/op",
+            "value": 66506,
+            "unit": "ns/op",
+            "extra": "18087 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage) - B/op",
+            "value": 11600,
+            "unit": "B/op",
+            "extra": "18087 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetBetweenKeys (github.com/parthkapoor-dev/golphin/internal/storage) - allocs/op",
+            "value": 243,
+            "unit": "allocs/op",
+            "extra": "18087 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst)",
+            "value": 153.6,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "7757780 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst) - ns/op",
+            "value": 153.6,
+            "unit": "ns/op",
+            "extra": "7757780 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "7757780 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "7757780 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst)",
+            "value": 155.4,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "7734160 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst) - ns/op",
+            "value": 155.4,
+            "unit": "ns/op",
+            "extra": "7734160 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "7734160 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "7734160 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst)",
+            "value": 154.2,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "7778163 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst) - ns/op",
+            "value": 154.2,
+            "unit": "ns/op",
+            "extra": "7778163 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "7778163 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkGetOldest (github.com/parthkapoor-dev/golphin/pkg/bst) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "7778163 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst)",
+            "value": 24011,
+            "unit": "ns/op\t    5569 B/op\t     200 allocs/op",
+            "extra": "50046 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst) - ns/op",
+            "value": 24011,
+            "unit": "ns/op",
+            "extra": "50046 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst) - B/op",
+            "value": 5569,
+            "unit": "B/op",
+            "extra": "50046 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst) - allocs/op",
+            "value": 200,
+            "unit": "allocs/op",
+            "extra": "50046 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst)",
+            "value": 24139,
+            "unit": "ns/op\t    5569 B/op\t     200 allocs/op",
+            "extra": "49648 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst) - ns/op",
+            "value": 24139,
+            "unit": "ns/op",
+            "extra": "49648 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst) - B/op",
+            "value": 5569,
+            "unit": "B/op",
+            "extra": "49648 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst) - allocs/op",
+            "value": 200,
+            "unit": "allocs/op",
+            "extra": "49648 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst)",
+            "value": 24200,
+            "unit": "ns/op\t    5569 B/op\t     200 allocs/op",
+            "extra": "49387 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst) - ns/op",
+            "value": 24200,
+            "unit": "ns/op",
+            "extra": "49387 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst) - B/op",
+            "value": 5569,
+            "unit": "B/op",
+            "extra": "49387 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkLargeInserts (github.com/parthkapoor-dev/golphin/pkg/bst) - allocs/op",
+            "value": 200,
+            "unit": "allocs/op",
+            "extra": "49387 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst)",
+            "value": 2030,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "569677 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst) - ns/op",
+            "value": 2030,
+            "unit": "ns/op",
+            "extra": "569677 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "569677 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "569677 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst)",
+            "value": 2066,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "573596 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst) - ns/op",
+            "value": 2066,
+            "unit": "ns/op",
+            "extra": "573596 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "573596 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "573596 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst)",
+            "value": 2035,
+            "unit": "ns/op\t       0 B/op\t       0 allocs/op",
+            "extra": "583766 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst) - ns/op",
+            "value": 2035,
+            "unit": "ns/op",
+            "extra": "583766 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst) - B/op",
+            "value": 0,
+            "unit": "B/op",
+            "extra": "583766 times\n4 procs"
+          },
+          {
+            "name": "BenchmarkRandomDataGetAndDelete (github.com/parthkapoor-dev/golphin/pkg/bst) - allocs/op",
+            "value": 0,
+            "unit": "allocs/op",
+            "extra": "583766 times\n4 procs"
           }
         ]
       }
