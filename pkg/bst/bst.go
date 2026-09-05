@@ -1,31 +1,36 @@
 package bst
 
-import "fmt"
+import (
+	"cmp"
+	"fmt"
+)
 
-type BST struct {
-	root *node
+type BST[K cmp.Ordered, V any] struct {
+	root *node[K, V]
 	Size int
 }
 
-func NewBst() *BST {
-	return &BST{nil, 0}
+func NewBst[K cmp.Ordered, V any]() *BST[K, V] {
+	return &BST[K, V]{nil, 0}
 }
 
-func (bst *BST) Find(key string) (bool, string, error) {
+func (bst *BST[K, V]) Find(key K) (bool, V, error) {
+
+	var res V
 
 	if bst.root == nil {
-		return false, "", nil
+		return false, res, nil
 	}
 
 	n := bst.root.dfs(key)
 	if n == nil {
-		return false, "", nil
+		return false, res, nil
 	}
 
 	return true, n.info, nil
 }
 
-func (bst *BST) Upsert(key string, value string) error {
+func (bst *BST[K, V]) Upsert(key K, value V) error {
 
 	new := newNode(key, value)
 
@@ -55,7 +60,7 @@ func (bst *BST) Upsert(key string, value string) error {
 	return nil
 }
 
-func (bst *BST) Delete(key string) error {
+func (bst *BST[K, V]) Delete(key K) error {
 
 	if bst.root.key == key {
 		if bst.root.left == nil {
@@ -81,40 +86,28 @@ func (bst *BST) Delete(key string) error {
 	return nil
 }
 
-func (bst *BST) FindBetween(leftKey string, rightKey string) ([]string, error) {
+func (bst *BST[K, V]) FindBetween(leftKey K, rightKey K) ([]V, error) {
 	if leftKey >= rightKey {
 		return nil, fmt.Errorf("invalid leftKey/rightKey")
 	}
 
+	results := make([]V, 0)
+
 	if bst.root == nil {
-		return nil, nil
+		return results, nil
 	}
 
-	results := make([]string, 0)
-
-	results = bst.root.findBetween(leftKey, rightKey, results)
-
-	return results, nil
+	return bst.root.findBetween(leftKey, rightKey, results), nil
 }
 
-func (bst *BST) Print(n *node) {
+func (bst *BST[K, V]) Iter() ([]V, error) {
 
-	if n == nil {
-		if bst.root == nil {
-			return
-		}
-		n = bst.root
+	results := make([]V, 0)
+
+	if bst.root == nil {
+		return results, nil
 	}
 
-	fmt.Print(n.key + " -->")
+	return bst.root.iter(results), nil
 
-	if n.left != nil {
-		fmt.Print("  left: " + n.left.key)
-	}
-
-	if n.right != nil {
-		fmt.Print("  right: " + n.right.key)
-	}
-
-	fmt.Print("\n")
 }

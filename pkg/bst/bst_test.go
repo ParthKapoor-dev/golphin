@@ -16,44 +16,38 @@ type testingCtx interface {
 	TempDir() string
 }
 
-func requireValue(t testingCtx, tr *bst.BST, key string, value string) {
+func requireValue(t testingCtx, tr *bst.BST[string, string], key string, value string) {
 	t.Helper()
 
 	found, got, err := tr.Find(key)
 	if err != nil {
-		tr.Print(nil)
 		t.Fatalf("Get() error: %v", err)
 	}
 	if !found {
-		tr.Print(nil)
 		t.Fatalf("Get() found = false, expected true")
 	}
 	if got != value {
-		tr.Print(nil)
 		t.Fatalf("Get() value = %q, expected %q", got, value)
 	}
 
 }
 
-func requireMissing(t testingCtx, tr *bst.BST, key string) {
+func requireMissing(t testingCtx, tr *bst.BST[string, string], key string) {
 	t.Helper()
 
 	found, value, err := tr.Find(key)
 	if err != nil {
-		tr.Print(nil)
 		t.Fatalf("Get(%q) error: %v", key, err)
 	}
 	if found {
-		tr.Print(nil)
 		t.Fatalf("Get(%q) = %q, want missing key", key, value)
 	}
 	if value != "" {
-		tr.Print(nil)
 		t.Fatalf("Get(%q) value = %q, want empty value", key, value)
 	}
 }
 
-func randomDataCreation(t testingCtx, tr *bst.BST, cache map[string]string, maxKey int, oprCnt int, deletionMultiple int) {
+func randomDataCreation(t testingCtx, tr *bst.BST[string, string], cache map[string]string, maxKey int, oprCnt int, deletionMultiple int) {
 
 	for i := range oprCnt {
 		key := strconv.Itoa(rand.Intn(maxKey))
@@ -64,14 +58,11 @@ func randomDataCreation(t testingCtx, tr *bst.BST, cache map[string]string, maxK
 		if i%deletionMultiple == 0 && exists {
 			err := tr.Delete(key)
 			if err != nil {
-				tr.Print(nil)
-				fmt.Println(key + ", value is " + cache[key])
 				t.Fatalf("Delete() error: %v", err)
 			}
 			delete(cache, key)
 		} else {
 			if err := tr.Upsert(key, value); err != nil {
-				tr.Print(nil)
 				t.Fatalf("Upsert() error: %v", err)
 			}
 			cache[key] = value
@@ -80,7 +71,7 @@ func randomDataCreation(t testingCtx, tr *bst.BST, cache map[string]string, maxK
 
 }
 
-func randomDataValidation(t testingCtx, tr *bst.BST, cache map[string]string, maxKey int) {
+func randomDataValidation(t testingCtx, tr *bst.BST[string, string], cache map[string]string, maxKey int) {
 
 	for i := range maxKey {
 		key := strconv.Itoa(i)
@@ -104,7 +95,7 @@ func randomDataValidation(t testingCtx, tr *bst.BST, cache map[string]string, ma
 
 func TestInsertMakesValueRetrievable(t *testing.T) {
 
-	tr := bst.NewBst()
+	tr := bst.NewBst[string, string]()
 
 	if err := tr.Upsert("key-1", "value-1"); err != nil {
 		t.Fatalf("Upsert() error: %v", err)
@@ -124,7 +115,7 @@ func TestInsertMakesValueRetrievable(t *testing.T) {
 
 func TestRetrievableUpsertAfterGet(t *testing.T) {
 
-	tr := bst.NewBst()
+	tr := bst.NewBst[string, string]()
 
 	if err := tr.Upsert("lang", "go"); err != nil {
 		t.Fatalf("Upsert() error: %v", err)
@@ -141,7 +132,7 @@ func TestRetrievableUpsertAfterGet(t *testing.T) {
 
 func TestUpsertReplacesExistingValue(t *testing.T) {
 
-	tr := bst.NewBst()
+	tr := bst.NewBst[string, string]()
 
 	if err := tr.Upsert("lang", "typescript"); err != nil {
 		t.Fatalf("Upsert() error: %v", err)
@@ -156,7 +147,7 @@ func TestUpsertReplacesExistingValue(t *testing.T) {
 
 func TestDeleteMakesKeyUnavailable(t *testing.T) {
 
-	tr := bst.NewBst()
+	tr := bst.NewBst[string, string]()
 
 	if err := tr.Upsert("0", "root"); err != nil {
 		t.Fatalf("Upsert() error: %v", err)
@@ -175,7 +166,7 @@ func TestDeleteMakesKeyUnavailable(t *testing.T) {
 
 func TestDeleteRootMakesKeyUnavailable(t *testing.T) {
 
-	tr := bst.NewBst()
+	tr := bst.NewBst[string, string]()
 
 	if err := tr.Upsert("0", "root"); err != nil {
 		t.Fatalf("Upsert() error: %v", err)
@@ -193,7 +184,7 @@ func TestRandomData(t *testing.T) {
 	cache := make(map[string]string)
 	maxKey := 10
 
-	tr := bst.NewBst()
+	tr := bst.NewBst[string, string]()
 
 	randomDataCreation(t, tr, cache, maxKey, 1000, 2)
 	randomDataValidation(t, tr, cache, maxKey)
@@ -201,7 +192,7 @@ func TestRandomData(t *testing.T) {
 
 func TestGetBetweenKeys(t *testing.T) {
 
-	tr := bst.NewBst()
+	tr := bst.NewBst[string, string]()
 
 	for i := range 100 {
 		key := fmt.Sprintf("key-%03d", i)
@@ -235,7 +226,7 @@ func TestGetBetweenKeys(t *testing.T) {
 
 func BenchmarkGetOldest(b *testing.B) {
 
-	tr := bst.NewBst()
+	tr := bst.NewBst[string, string]()
 
 	for i := range 100 {
 		key := fmt.Sprintf("key-%d", i)
@@ -254,7 +245,7 @@ func BenchmarkGetOldest(b *testing.B) {
 
 func BenchmarkLargeInserts(b *testing.B) {
 
-	tr := bst.NewBst()
+	tr := bst.NewBst[string, string]()
 
 	b.ResetTimer()
 
@@ -275,7 +266,7 @@ func BenchmarkRandomDataGetAndDelete(b *testing.B) {
 	cache := make(map[string]string)
 	maxKey := 10
 
-	tr := bst.NewBst()
+	tr := bst.NewBst[string, string]()
 	randomDataCreation(b, tr, cache, maxKey, 100, 2)
 
 	b.ResetTimer()

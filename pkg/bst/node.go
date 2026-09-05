@@ -1,19 +1,22 @@
 package bst
 
-import "fmt"
+import (
+	"cmp"
+	"fmt"
+)
 
-type node struct {
-	key   string
-	info  string
-	left  *node
-	right *node
+type node[K cmp.Ordered, V any] struct {
+	key   K
+	info  V
+	left  *node[K, V]
+	right *node[K, V]
 }
 
-func newNode(key, info string) *node {
-	return &node{key, info, nil, nil}
+func newNode[K cmp.Ordered, V any](key K, info V) *node[K, V] {
+	return &node[K, V]{key, info, nil, nil}
 }
 
-func (n *node) dfs(key string) *node {
+func (n *node[K, V]) dfs(key K) *node[K, V] {
 
 	if n.key == key {
 		return n
@@ -28,7 +31,7 @@ func (n *node) dfs(key string) *node {
 	return nil
 }
 
-func (n *node) dfsNearest(key string) *node {
+func (n *node[K, V]) dfsNearest(key K) *node[K, V] {
 
 	if n.key == key {
 		return n
@@ -44,7 +47,7 @@ func (n *node) dfsNearest(key string) *node {
 	return n
 }
 
-func (n *node) add(new *node) error {
+func (n *node[K, V]) add(new *node[K, V]) error {
 
 	if new == nil {
 		return fmt.Errorf("null new node")
@@ -66,7 +69,7 @@ func (n *node) add(new *node) error {
 	return fmt.Errorf("cannot add to this node")
 }
 
-func (n *node) delete(prev *node, target string) error {
+func (n *node[K, V]) delete(prev *node[K, V], target K) error {
 
 	if target == n.key {
 
@@ -121,7 +124,7 @@ func (n *node) delete(prev *node, target string) error {
 	return fmt.Errorf("target doesn't exists")
 }
 
-func (n *node) findBetween(mini string, maxi string, results []string) []string {
+func (n *node[K, V]) findBetween(mini K, maxi K, results []V) []V {
 	if n == nil {
 		return results
 	}
@@ -137,6 +140,18 @@ func (n *node) findBetween(mini string, maxi string, results []string) []string 
 	if n.key < maxi {
 		results = n.right.findBetween(mini, maxi, results)
 	}
+
+	return results
+}
+
+func (n *node[K, V]) iter(results []V) []V {
+	if n == nil {
+		return results
+	}
+
+	results = n.left.iter(results)
+	results = append(results, n.info)
+	results = n.right.iter(results)
 
 	return results
 }
