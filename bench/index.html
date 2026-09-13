@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>golphin · bench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.6.0/echarts.min.js"></script>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #fafafa;
+  --card: #ffffff;
+  --card-2: #f4f4f5;
+  --border: rgba(9, 9, 11, 0.09);
+  --border-strong: rgba(9, 9, 11, 0.16);
+  --ink: #09090b;
+  --ink-2: #52525b;
+  --muted: #8a8a93;
+  --grid: #ececef;
+  --axis: #d4d4d8;
+  --pkg-1: #2a78d6;
+  --pkg-2: #eb6834;
+  --pkg-3: #1baf7a;
+  --slower: #c42f2f;
+  --faster: #006300;
+  --div-slow: #d03b3b;
+  --div-fast: #2a78d6;
+  --div-mid: #ececef;
+  --glass: rgba(255, 255, 255, 0.72);
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px -12px rgba(0,0,0,.12);
+  --glow-alpha: 0.35;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #09090b;
+    --card: #0f0f11;
+    --card-2: #151518;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --ink: #fafafa;
+    --ink-2: #a1a1aa;
+    --muted: #71717a;
+    --grid: #1c1c20;
+    --axis: #2e2e33;
+    --pkg-1: #3987e5;
+    --pkg-2: #d95926;
+    --pkg-3: #199e70;
+    --slower: #e66767;
+    --faster: #22b33a;
+    --div-slow: #e66767;
+    --div-fast: #3987e5;
+    --div-mid: #222226;
+    --glass: rgba(15, 15, 17, 0.62);
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.7);
+    --glow-alpha: 0.6;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #09090b;
+  --card: #0f0f11;
+  --card-2: #151518;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --ink: #fafafa;
+  --ink-2: #a1a1aa;
+  --muted: #71717a;
+  --grid: #1c1c20;
+  --axis: #2e2e33;
+  --pkg-1: #3987e5;
+  --pkg-2: #d95926;
+  --pkg-3: #199e70;
+  --slower: #e66767;
+  --faster: #22b33a;
+  --div-slow: #e66767;
+  --div-fast: #3987e5;
+  --div-mid: #222226;
+  --glass: rgba(15, 15, 17, 0.62);
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.7);
+  --glow-alpha: 0.6;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.5 "Space Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.mono, code, kbd,
+.eyebrow, .chip, .seg button, .stat .label, .stat .sub, .card-h .desc, .legend-row,
+.trend-title .pkg, .big-sub, th, tr.pkg-row td, .banner, .scale, footer, .search input {
+  font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+button { font: inherit; color: inherit; }
+a { color: inherit; }
+
+/* faint dotted plane, the evilcharts backdrop */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(var(--border-strong) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, #000 20%, transparent 75%);
+}
+
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 0 64px; }
+
+/* ── top bar ───────────────────────────── */
+.top {
+  position: sticky; top: 0; z-index: 20;
+  backdrop-filter: blur(12px) saturate(1.4);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.top-in { max-width: 1240px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; gap: 14px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.01em; }
+.brand-mark {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: conic-gradient(from 200deg, var(--pkg-1), var(--pkg-3), var(--pkg-2), var(--pkg-1));
+  box-shadow: 0 0 18px -2px color-mix(in srgb, var(--pkg-1) 60%, transparent);
+}
+.brand .slash { color: var(--muted); font-weight: 400; }
+.spacer { flex: 1; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--card);
+  color: var(--ink-2); font-size: 12px; white-space: nowrap;
+}
+button.chip { cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+button.chip:hover { border-color: var(--border-strong); color: var(--ink); }
+kbd {
+  font-size: 11px; padding: 1px 5px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--card-2); color: var(--muted);
+}
+.hide-sm { }
+@media (max-width: 720px) { .hide-sm { display: none !important; } }
+
+/* ── hero ───────────────────────────── */
+.hero { padding-block: 36px 22px; display: grid; gap: 18px; }
+.eyebrow { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; flex-wrap: wrap; }
+.pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--faster); box-shadow: 0 0 0 0 var(--faster); animation: pulse 2.4s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--faster) 55%, transparent); } 70%,100% { box-shadow: 0 0 0 7px transparent; } }
+.hero h1 { margin: 0; font-size: clamp(22px, 3.4vw, 32px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.2; overflow-wrap: anywhere; }
+.hero h1 .sha { color: var(--muted); font-weight: 400; font-size: .72em; margin-right: 10px; vertical-align: 2px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 860px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.stat {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px 16px; box-shadow: var(--shadow); position: relative; overflow: hidden;
+}
+.stat .label { color: var(--muted); font-size: 11.5px; text-transform: lowercase; display: flex; align-items: center; gap: 6px; }
+.stat .value { font-size: 26px; font-weight: 600; letter-spacing: -0.03em; margin-top: 2px; }
+.stat .sub { color: var(--ink-2); font-size: 11.5px; }
+.stat.slower .value { color: var(--slower); }
+.stat.faster .value { color: var(--faster); }
+
+.banner {
+  display: flex; gap: 10px; align-items: center;
+  padding: 10px 14px; border-radius: 10px; font-size: 13px;
+  border: 1px solid color-mix(in srgb, var(--slower) 35%, transparent);
+  background: color-mix(in srgb, var(--slower) 8%, var(--card));
+}
+
+/* ── cards ───────────────────────────── */
+.card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow); margin-top: 16px; overflow: hidden;
+}
+.card-h { display: flex; align-items: center; gap: 12px; padding: 14px 16px 0; flex-wrap: wrap; }
+.card-h h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.card-h .desc { color: var(--muted); font-size: 11.5px; }
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 980px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+.grid-2 > .card { margin-top: 16px; }
+
+.seg { display: inline-flex; padding: 2px; border-radius: 9px; background: var(--card-2); border: 1px solid var(--border); }
+.seg button {
+  border: 0; background: transparent; padding: 3px 10px; border-radius: 7px; cursor: pointer;
+  font-size: 12px; color: var(--muted); transition: color .15s, background .15s;
+}
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 0 0 1px var(--border); }
+
+/* ── trend ───────────────────────────── */
+.trend-head { padding: 16px 16px 0; display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+.trend-title { display: grid; gap: 2px; min-width: 0; }
+.trend-title .pkg { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.trend-title .name { font-size: clamp(15px, 2.2vw, 18px); font-weight: 600; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.big { font-size: clamp(24px, 3.4vw, 30px); font-weight: 600; letter-spacing: -0.035em; line-height: 1; }
+.big-sub { font-size: 12px; color: var(--ink-2); margin-top: 4px; }
+.swatch { width: 10px; height: 3px; border-radius: 2px; display: inline-block; }
+#trend { height: 340px; }
+.legend-row { display: flex; gap: 14px; padding: 0 16px 14px; color: var(--muted); font-size: 11.5px; flex-wrap: wrap; }
+.legend-row span { display: inline-flex; align-items: center; gap: 6px; }
+.lg-band { width: 14px; height: 8px; border-radius: 2px; }
+.lg-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+
+#compare { height: 380px; }
+
+/* ── table ───────────────────────────── */
+.toolbar { display: flex; gap: 8px; align-items: center; padding: 12px 16px; flex-wrap: wrap; }
+.search {
+  flex: 1; min-width: 180px; display: flex; align-items: center; gap: 8px;
+  height: 32px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--border); background: var(--card-2);
+}
+.search:focus-within { border-color: var(--border-strong); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pkg-1) 18%, transparent); }
+.search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 13px; }
+.search svg { color: var(--muted); flex: none; }
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* keep the benchmark name visible while the numbers scroll sideways */
+td:first-child, th:first-child { position: sticky; left: 0; z-index: 1; }
+th:first-child { background: var(--card-2); }
+tbody tr.b td:first-child { background: var(--card); }
+tbody tr.b[aria-selected="true"] td:first-child { background: color-mix(in srgb, var(--sel) 10%, var(--card)); box-shadow: inset 2px 0 0 var(--sel); }
+tr.pkg-row td:first-child { position: static; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th {
+  text-align: right; font-weight: 500; color: var(--muted); font-size: 11px; letter-spacing: .02em; text-transform: lowercase;
+  padding: 8px 14px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  background: var(--card-2); white-space: nowrap;
+}
+th:first-child { text-align: left; }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td:first-child { text-align: left; }
+tr.pkg-row td { background: color-mix(in srgb, var(--card-2) 60%, transparent); color: var(--ink-2); font-size: 12px; padding-block: 6px; }
+tr.pkg-row .dot { width: 8px; height: 8px; border-radius: 3px; display: inline-block; margin-right: 8px; vertical-align: 0; }
+tbody tr.b { cursor: pointer; transition: background .12s; }
+tbody tr.b:hover { background: color-mix(in srgb, var(--ink) 3%, transparent); }
+tbody tr.b[aria-selected="true"] { background: color-mix(in srgb, var(--sel) 10%, transparent); box-shadow: inset 2px 0 0 var(--sel); }
+tbody tr.b:focus-visible { outline: 2px solid var(--sel); outline-offset: -2px; }
+.bname { font-weight: 500; }
+.num, .bname { font-size: 12.5px; }
+.num { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; }
+.spread { color: var(--muted); font-size: 11.5px; margin-left: 4px; }
+.delta { display: inline-flex; align-items: center; gap: 4px; font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; padding: 1px 7px; border-radius: 6px; }
+.delta.slower { color: var(--slower); background: color-mix(in srgb, var(--slower) 11%, transparent); }
+.delta.faster { color: var(--faster); background: color-mix(in srgb, var(--faster) 11%, transparent); }
+.delta.same { color: var(--muted); }
+.delta.new { color: var(--ink-2); border: 1px dashed var(--border-strong); }
+.spark { display: block; margin-left: auto; overflow: visible; }
+
+/* ── heatmap ───────────────────────────── */
+#heat { height: 360px; }
+.heat-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media (max-width: 640px) { #heat { min-width: 560px; } }
+.scale { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11.5px; }
+.scale .bar { width: 120px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--div-fast), var(--div-mid), var(--div-slow)); }
+
+/* ── tooltip (frosted glass) ───────────────────────────── */
+.tt {
+  background: var(--glass) !important; border: 1px solid var(--border-strong) !important;
+  backdrop-filter: blur(14px) saturate(1.5); -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  border-radius: 10px !important; box-shadow: var(--shadow) !important;
+  padding: 10px 12px !important; color: var(--ink) !important; font: 12px/1.45 "Geist Mono", ui-monospace, monospace !important;
+  max-width: 320px; white-space: normal !important;
+}
+.tt:empty { display: none !important; }
+.tt .t-h { display: flex; gap: 8px; align-items: baseline; margin-bottom: 6px; }
+.tt .t-sha { font-family: "Geist Mono", monospace; color: var(--muted); font-size: 11.5px; }
+.tt .t-msg { font-family: "Space Grotesk", system-ui, sans-serif; font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px; }
+.tt .t-row { display: grid; grid-template-columns: 12px 1fr auto; gap: 8px; align-items: center; }
+.tt .t-row + .t-row { margin-top: 3px; }
+.tt .t-key { width: 10px; height: 3px; border-radius: 2px; }
+.tt .t-lbl { color: var(--ink-2); }
+.tt .t-val { font-family: "Geist Mono", monospace; font-weight: 500; text-align: right; }
+.tt .t-foot { margin-top: 7px; padding-top: 6px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11.5px; }
+
+/* ── motion ───────────────────────────── */
+.rise { opacity: 0; transform: translateY(6px); animation: rise .5s cubic-bezier(.2,.7,.2,1) forwards; }
+@keyframes rise { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .rise { animation: none; opacity: 1; transform: none; } .pulse { animation: none; } }
+
+.skeleton { position: relative; overflow: hidden; background: var(--card-2); border-radius: 10px; }
+.skeleton::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(100deg, transparent 20%, color-mix(in srgb, var(--ink) 6%, transparent) 50%, transparent 80%);
+  animation: shimmer 1.6s infinite;
+}
+@keyframes shimmer { to { transform: translateX(100%); } }
+
+@media (max-width: 640px) {
+  .wrap { padding-inline: 16px; }
+  .top-in { padding-inline: 16px; }
+  .hero { padding-block: 24px 14px; gap: 14px; }
+  .stats { gap: 8px; }
+  .stat { padding: 12px; }
+  .stat .value { font-size: 22px; }
+  .trend-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .trend-head > div:last-child { text-align: left !important; }
+  .card-h .desc { flex-basis: 100%; }
+  #trend { height: 260px; }
+  #compare { height: 320px; }
+  td, th { padding-inline: 10px; }
+  .toolbar .seg { width: 100%; }
+  .toolbar .seg button { flex: 1; }
+  .card-h .scale { flex-basis: 100%; }
+}
+footer { color: var(--muted); font-size: 12px; margin-top: 28px; display: flex; gap: 14px; flex-wrap: wrap; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span>golphin <span class="slash">/</span> <span style="font-weight:500">bench</span></div>
+    <span class="spacer"></span>
+    <span class="chip mono hide-sm" id="runPicker" title="Commit being inspected — click any point on the trend chart to change it">—</span>
+    <button class="chip hide-sm" id="helpBtn" title="Keyboard shortcuts"><kbd>/</kbd> search <kbd>j</kbd><kbd>k</kbd> move <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> metric</button>
+    <button class="chip" id="themeBtn" aria-label="Toggle theme">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap" id="app">
+  <section class="hero">
+    <div class="skeleton" style="height:18px;width:260px"></div>
+    <div class="skeleton" style="height:34px;width:min(560px,100%)"></div>
+    <div class="stats">
+      <div class="skeleton" style="height:84px"></div><div class="skeleton" style="height:84px"></div>
+      <div class="skeleton" style="height:84px"></div><div class="skeleton" style="height:84px"></div>
+    </div>
+  </section>
+  <div class="skeleton" style="height:420px;margin-top:16px"></div>
+</main>
+
+<script>
+(() => {
+"use strict";
+
+// ─────────────────────────────────────────────────────────────
+// Data model
+// ─────────────────────────────────────────────────────────────
+const METRICS = {
+  ns:     { label: "time/op",   short: "time",   fmt: fmtNs },
+  bytes:  { label: "B/op",      short: "memory", fmt: fmtBytes },
+  allocs: { label: "allocs/op", short: "allocs", fmt: fmtCount },
+};
+const PKG_SLOTS = 3; // validated categorical slots; beyond that we'd fold to "other"
+
+const state = {
+  data: null,
+  keys: [],           // "pkg.Name", stable order
+  byKey: new Map(),   // key -> { pkg, name, points: [ per run | null ] }
+  pkgs: [],           // package order -> color slot
+  head: 0,            // index of run being inspected
+  sel: null,          // selected key
+  metric: "ns",
+  query: "",
+};
+
+function median(xs) {
+  if (!xs || !xs.length) return NaN;
+  const s = [...xs].sort((a, b) => a - b), m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+function index(data) {
+  state.data = data;
+  const keys = [], byKey = new Map(), pkgs = [];
+  data.runs.forEach((run, ri) => {
+    for (const b of run.benchmarks) {
+      const key = b.pkg + "." + b.name;
+      if (!byKey.has(key)) {
+        byKey.set(key, { key, pkg: b.pkg, name: b.name, points: new Array(data.runs.length).fill(null) });
+        keys.push(key);
+      }
+      if (!pkgs.includes(b.pkg)) pkgs.push(b.pkg);
+      const p = {};
+      for (const m of Object.keys(METRICS)) {
+        const xs = b.samples[m] || [];
+        p[m] = { med: median(xs), min: Math.min(...xs), max: Math.max(...xs), n: xs.length, xs };
+      }
+      byKey.get(key).points[ri] = p;
+    }
+  });
+  // storage first, then pkg/* alphabetically — the "product" before its parts
+  pkgs.sort((a, b) => (a.startsWith("internal") ? -1 : 0) - (b.startsWith("internal") ? -1 : 0) || a.localeCompare(b));
+  keys.sort((a, b) => pkgs.indexOf(byKey.get(a).pkg) - pkgs.indexOf(byKey.get(b).pkg));
+  Object.assign(state, { keys, byKey, pkgs, head: data.runs.length - 1 });
+}
+
+// Compare run `ri` against the closest earlier run that has this benchmark.
+function compare(key, metric, ri) {
+  const s = state.byKey.get(key), cur = s.points[ri];
+  if (!cur) return null;
+  let pi = ri - 1;
+  while (pi >= 0 && !s.points[pi]) pi--;
+  if (pi < 0) return { cur: cur[metric], prev: null, verdict: "new" };
+  const a = s.points[pi][metric], b = cur[metric];
+  const pct = a.med === 0 ? (b.med === 0 ? 0 : Infinity) : (b.med - a.med) / a.med * 100;
+  // Overlapping sample ranges mean the change is indistinguishable from runner noise.
+  const overlap = b.min <= a.max && a.min <= b.max;
+  let verdict = "same";
+  if (!overlap && Math.abs(pct) >= 2) verdict = pct > 0 ? "slower" : "faster";
+  return { cur: b, prev: a, pct, verdict, prevRun: pi };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Formatting
+// ─────────────────────────────────────────────────────────────
+function trimNum(v) { return (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v.toFixed(2)).replace(/\.0+$|(\.\d*?)0+$/, "$1"); }
+function fmtNs(v) {
+  if (!isFinite(v)) return "—";
+  if (v >= 1e9) return trimNum(v / 1e9) + " s";
+  if (v >= 1e6) return trimNum(v / 1e6) + " ms";
+  if (v >= 1e3) return trimNum(v / 1e3) + " µs";
+  return trimNum(v) + " ns";
+}
+function fmtBytes(v) {
+  if (!isFinite(v)) return "—";
+  if (v >= 1 << 30) return trimNum(v / (1 << 30)) + " GiB";
+  if (v >= 1 << 20) return trimNum(v / (1 << 20)) + " MiB";
+  if (v >= 1 << 10) return trimNum(v / (1 << 10)) + " KiB";
+  return Math.round(v) + " B";
+}
+function fmtCount(v) {
+  if (!isFinite(v)) return "—";
+  if (v >= 1e6) return trimNum(v / 1e6) + "M";
+  if (v >= 1e4) return trimNum(v / 1e3) + "k";
+  return Math.round(v).toLocaleString();
+}
+function fmtPct(p) {
+  if (!isFinite(p)) return "new";
+  const a = Math.abs(p);
+  return (p > 0 ? "+" : p < 0 ? "−" : "±") + (a >= 100 ? a.toFixed(0) : a.toFixed(1)) + "%";
+}
+function ago(ts) {
+  const s = (Date.now() - new Date(ts)) / 1000;
+  const u = [["y", 31536e3], ["mo", 2592e3], ["d", 864e2], ["h", 3600], ["m", 60]];
+  for (const [n, d] of u) if (s >= d) return Math.floor(s / d) + n + " ago";
+  return "just now";
+}
+const short = (sha) => (sha || "").slice(0, 7);
+const firstLine = (m) => (m || "").split("\n")[0];
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pkgShort = (p) => p.split("/").pop();
+
+// ─────────────────────────────────────────────────────────────
+// Theme tokens → charts
+// ─────────────────────────────────────────────────────────────
+let T = {};
+function readTokens() {
+  const cs = getComputedStyle(document.documentElement);
+  const g = (n) => cs.getPropertyValue(n).trim();
+  T = {
+    ink: g("--ink"), ink2: g("--ink-2"), muted: g("--muted"), grid: g("--grid"), axis: g("--axis"),
+    card: g("--card"), border: g("--border-strong"),
+    pkg: [g("--pkg-1"), g("--pkg-2"), g("--pkg-3")],
+    slower: g("--slower"), faster: g("--faster"),
+    divSlow: g("--div-slow"), divFast: g("--div-fast"), divMid: g("--div-mid"),
+    glow: parseFloat(g("--glow-alpha")),
+  };
+}
+const pkgColor = (pkg) => T.pkg[Math.min(state.pkgs.indexOf(pkg), PKG_SLOTS - 1)] || T.muted;
+function alpha(hex, a) {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.replace(/./g, "$&$&") : h, 16);
+  return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
+}
+const FONT = "Space Grotesk, system-ui, sans-serif", MONO = "Geist Mono, ui-monospace, monospace";
+
+function baseAxis() {
+  return {
+    axisLine: { lineStyle: { color: T.axis } },
+    axisTick: { show: false },
+    axisLabel: { color: T.muted, fontFamily: MONO, fontSize: 11 },
+    splitLine: { lineStyle: { color: T.grid } },
+  };
+}
+const tooltipBase = () => ({
+  className: "tt", borderWidth: 0, padding: 0, backgroundColor: "transparent",
+  transitionDuration: 0.18, extraCssText: "", confine: true,
+});
+
+const measureCtx = document.createElement("canvas").getContext("2d");
+function textWidth(labels, font) {
+  measureCtx.font = font;
+  return Math.max(0, ...labels.map((l) => measureCtx.measureText(l).width));
+}
+
+// ─────────────────────────────────────────────────────────────
+// Layout
+// ─────────────────────────────────────────────────────────────
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "class") n.className = v;
+    else if (k === "style") n.style.cssText = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null) n.append(k.nodeType ? k : document.createTextNode(k));
+  return n;
+}
+
+function renderShell() {
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <section class="hero" id="hero"></section>
+    <div id="failures"></div>
+
+    <div class="grid-2">
+      <section class="card rise" style="animation-delay:.05s">
+        <div class="trend-head">
+          <div class="trend-title">
+            <div class="pkg" id="tPkg"></div>
+            <div class="name mono" id="tName"></div>
+          </div>
+          <span class="spacer"></span>
+          <div style="text-align:right">
+            <div class="big mono" id="tBig"></div>
+            <div class="big-sub" id="tSub"></div>
+          </div>
+        </div>
+        <div class="card-h" style="padding-top:12px">
+          <div class="seg" role="group" aria-label="Metric" id="metricSeg"></div>
+          <span class="desc">median per commit · band = min–max of samples · click a point to inspect that commit</span>
+        </div>
+        <div id="trend" role="img" aria-label="Benchmark trend over commits"></div>
+        <div class="legend-row" id="tLegend"></div>
+      </section>
+
+      <section class="card rise" style="animation-delay:.1s">
+        <div class="card-h">
+          <h2>Across packages</h2>
+          <span class="desc">same benchmark, different implementation · log scale</span>
+        </div>
+        <div id="compare" role="img" aria-label="Benchmark comparison across packages"></div>
+        <div class="legend-row" id="cLegend"></div>
+      </section>
+    </div>
+
+    <section class="card rise" style="animation-delay:.15s">
+      <div class="card-h">
+        <h2>Results</h2>
+        <span class="desc" id="resDesc"></span>
+      </div>
+      <div class="toolbar">
+        <label class="search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span class="sr-only">Filter benchmarks</span>
+          <input id="q" placeholder="Filter benchmarks…" autocomplete="off" spellcheck="false">
+          <kbd>/</kbd>
+        </label>
+        <div class="seg" role="group" aria-label="Show" id="filterSeg">
+          <button aria-pressed="true" data-f="all">All</button>
+          <button aria-pressed="false" data-f="changed">Changed</button>
+          <button aria-pressed="false" data-f="slower">Regressions</button>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr>
+            <th>Benchmark</th><th>time/op</th><th>Δ time</th><th>B/op</th><th>Δ mem</th><th>allocs/op</th><th>Δ allocs</th><th>history</th>
+          </tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card rise" style="animation-delay:.2s">
+      <div class="card-h">
+        <h2>Change map</h2>
+        <span class="desc" id="heatDesc">time/op change vs the previous commit · grey = within noise</span>
+        <span class="spacer"></span>
+        <div class="scale"><span>faster</span><span class="bar"></span><span>slower</span></div>
+      </div>
+      <div class="heat-scroll"><div id="heat" role="img" aria-label="Per-commit change heatmap"></div></div>
+    </section>
+
+    <footer>
+      <span id="footRepo"></span>
+      <span id="footEnv"></span>
+      <span>data: <a href="data.json" class="mono">data.json</a></span>
+    </footer>`;
+
+  const seg = document.getElementById("metricSeg");
+  Object.entries(METRICS).forEach(([k, m], i) => {
+    seg.append(el("button", { "aria-pressed": String(k === state.metric), "data-m": k, onclick: () => setMetric(k) }, m.short));
+  });
+  document.getElementById("q").addEventListener("input", (e) => { state.query = e.target.value.toLowerCase(); renderTable(); });
+  document.getElementById("filterSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    for (const x of e.currentTarget.children) x.setAttribute("aria-pressed", String(x === b));
+    state.filter = b.dataset.f; renderTable();
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Hero
+// ─────────────────────────────────────────────────────────────
+function renderHero() {
+  const { data } = state, run = data.runs[state.head];
+  const verdicts = { slower: 0, faster: 0, same: 0, new: 0 };
+  for (const key of state.keys) {
+    const c = compare(key, "ns", state.head);
+    if (c) verdicts[c.verdict]++;
+  }
+  const benchCount = run.benchmarks.length;
+  const isLatest = state.head === data.runs.length - 1;
+
+  const hero = document.getElementById("hero");
+  hero.replaceChildren(
+    el("div", { class: "eyebrow rise" },
+      el("span", { class: "pulse", style: isLatest ? "" : "animation:none;background:var(--muted)" }),
+      isLatest ? "latest run" : `inspecting run ${state.head + 1} of ${data.runs.length}`,
+      " · ", ago(run.timestamp), " · ", run.author || "",
+      isLatest ? null : el("button", { class: "chip", style: "height:22px", onclick: () => setHead(data.runs.length - 1) }, "jump to latest →")),
+    el("h1", { class: "rise", style: "animation-delay:.03s" },
+      el("a", { class: "sha mono", href: `${data.repo}/commit/${run.sha}`, target: "_blank", rel: "noopener", style: "text-decoration:none" }, short(run.sha)),
+      firstLine(run.message)),
+    el("div", { class: "stats" },
+      stat("benchmarks", benchCount, `${new Set(run.benchmarks.map((b) => b.pkg)).size} packages · ${run.benchmarks[0]?.samples.ns.length ?? 0} samples each`, "", 0),
+      stat("▲ regressed", verdicts.slower, "slower beyond sample range", verdicts.slower ? "slower" : "", 1),
+      stat("▼ improved", verdicts.faster, "faster beyond sample range", verdicts.faster ? "faster" : "", 2),
+      stat("~ unchanged", verdicts.same, verdicts.new ? `${verdicts.new} new benchmark${verdicts.new > 1 ? "s" : ""}` : "within runner noise", "", 3)),
+  );
+
+  const f = document.getElementById("failures");
+  f.replaceChildren();
+  if (run.failed?.length) {
+    f.append(el("div", { class: "banner rise" },
+      el("strong", {}, "Build failed"),
+      el("span", { style: "color:var(--ink-2)" }, "these packages produced no results: "),
+      el("code", {}, run.failed.join(", "))));
+  }
+
+  const picker = document.getElementById("runPicker");
+  picker.textContent = `${short(run.sha)} · ${state.head + 1}/${data.runs.length}`;
+  document.getElementById("resDesc").textContent =
+    state.head > 0 ? `${short(run.sha)} vs ${short(data.runs[state.head - 1].sha)} · Δ shown only when sample ranges don't overlap` : "first recorded run";
+  document.getElementById("footRepo").textContent = data.repo.replace("https://github.com/", "");
+  const env = run.env || {};
+  document.getElementById("footEnv").textContent = [env.goos && `${env.goos}/${env.goarch}`, env.cpu, env.go].filter(Boolean).join(" · ");
+}
+function stat(label, value, sub, cls, i) {
+  return el("div", { class: `stat rise ${cls}`, style: `animation-delay:${0.06 + i * 0.04}s` },
+    el("div", { class: "label" }, label),
+    el("div", { class: "value mono" }, String(value)),
+    el("div", { class: "sub" }, sub));
+}
+
+// ─────────────────────────────────────────────────────────────
+// Trend chart
+// ─────────────────────────────────────────────────────────────
+let trendChart, compareChart, heatChart;
+
+function renderTrend() {
+  const s = state.byKey.get(state.sel), M = METRICS[state.metric], runs = state.data.runs;
+  const color = pkgColor(s.pkg);
+  document.documentElement.style.setProperty("--sel", color);
+
+  document.getElementById("tPkg").replaceChildren(el("span", { class: "swatch", style: `background:${color}` }), s.pkg);
+  document.getElementById("tName").textContent = "Benchmark" + s.name;
+  const c = compare(state.sel, state.metric, state.head);
+  document.getElementById("tBig").textContent = c ? M.fmt(c.cur.med) : "—";
+  const sub = document.getElementById("tSub");
+  sub.replaceChildren();
+  if (c) sub.append(deltaBadge(c), " ", el("span", {}, `${M.label} @ ${short(runs[state.head].sha)}`));
+  for (const b of document.querySelectorAll("#metricSeg button")) b.setAttribute("aria-pressed", String(b.dataset.m === state.metric));
+
+  const idx = runs.map((_, i) => i).filter((i) => s.points[i]);
+  state.trendIdx = idx;
+  const cats = idx.map((i) => short(runs[i].sha));
+  const pts = idx.map((i) => s.points[i][state.metric]);
+  const headPos = idx.indexOf(state.head);
+
+  const scatter = [];
+  pts.forEach((p, i) => p.xs.forEach((v) => scatter.push([i, v])));
+
+  const glowLayers = [[5, 0.9], [14, 0.5], [28, 0.25]].map(([blur, a]) => ({
+    type: "line", data: pts.map((p) => p.med), silent: true, symbol: "none", smooth: 0.35, smoothMonotone: "x", z: 2,
+    lineStyle: { width: 2, color, opacity: a * T.glow, shadowBlur: blur, shadowColor: color },
+    animationDuration: 1000, animationEasing: "cubicOut",
+  }));
+
+  trendChart.setOption({
+    animationDuration: 1000, animationEasing: "cubicOut", animationDurationUpdate: 450, animationEasingUpdate: "cubicOut",
+    textStyle: { fontFamily: FONT },
+    grid: { left: 16, right: 36, top: 24, bottom: runs.length > 24 ? 56 : 28, containLabel: true },
+    xAxis: { type: "category", data: cats, boundaryGap: false, ...baseAxis(), splitLine: { show: false },
+      axisLabel: { color: T.muted, fontFamily: MONO, fontSize: 11, margin: 12, hideOverlap: true } },
+    yAxis: {
+      type: "value", min: 0, ...baseAxis(), axisLine: { show: false },
+      axisLabel: { color: T.muted, fontFamily: MONO, fontSize: 11, formatter: (v) => M.fmt(v) },
+      splitNumber: 4,
+    },
+    dataZoom: runs.length > 24 ? [
+      { type: "inside", startValue: Math.max(0, cats.length - 24) },
+      { type: "slider", height: 18, bottom: 8, borderColor: "transparent", backgroundColor: T.grid,
+        fillerColor: alpha(color, 0.15), handleStyle: { color: T.card, borderColor: T.border }, textStyle: { color: T.muted },
+        dataBackground: { lineStyle: { color: T.axis }, areaStyle: { color: "transparent" } } },
+    ] : [],
+    tooltip: {
+      ...tooltipBase(), trigger: "axis",
+      axisPointer: { type: "line", lineStyle: { color: T.border, width: 1 } },
+      formatter: (params) => trendTooltip(s, idx[params[0].dataIndex]),
+    },
+    series: [
+      // min–max band: invisible floor + stacked range
+      { type: "line", data: pts.map((p) => p.min), stack: "band", symbol: "none", silent: true, lineStyle: { opacity: 0 }, smooth: 0.35, smoothMonotone: "x", z: 1 },
+      { type: "line", data: pts.map((p) => p.max - p.min), stack: "band", symbol: "none", silent: true, lineStyle: { opacity: 0 }, smooth: 0.35, smoothMonotone: "x", z: 1,
+        areaStyle: { color: alpha(color, 0.16) } },
+      ...glowLayers,
+      {
+        name: "median", type: "line", data: pts.map((p) => p.med), smooth: 0.35, smoothMonotone: "x", z: 3,
+        symbol: "circle", symbolSize: (v, p) => (p.dataIndex === headPos ? 9 : 5), showSymbol: true,
+        itemStyle: { color, borderColor: T.card, borderWidth: 2 },
+        lineStyle: { width: 2, color },
+        emphasis: { scale: 1.6, itemStyle: { borderWidth: 2 } },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: alpha(color, 0.28) },
+            { offset: 0.6, color: alpha(color, 0.06) },
+            { offset: 1, color: alpha(color, 0) },
+          ]),
+        },
+        markLine: headPos >= 0 ? {
+          silent: true, symbol: "none", animation: false,
+          label: { show: false },
+          lineStyle: { color: alpha(color, 0.55), type: "solid", width: 1 },
+          data: [{ xAxis: headPos }],
+        } : undefined,
+      },
+      {
+        name: "samples", type: "scatter", data: scatter, symbolSize: 4, z: 4, silent: true,
+        itemStyle: { color: T.ink, opacity: 0.35 },
+      },
+    ],
+  }, { notMerge: true });
+
+  document.getElementById("tLegend").replaceChildren(
+    el("span", {}, el("span", { class: "swatch", style: `background:${color};box-shadow:0 0 8px ${color}` }), "median"),
+    el("span", {}, el("span", { class: "lg-band", style: `background:${alpha(color, 0.22)}` }), "sample range"),
+    el("span", {}, el("span", { class: "lg-dot" }), "individual samples"),
+  );
+}
+
+function trendTooltip(s, ri) {
+  const run = state.data.runs[ri];
+  const rows = Object.entries(METRICS).map(([m, M]) => {
+    const c = compare(s.key, m, ri);
+    const d = !c || c.verdict === "new" ? "" :
+      `<span style="color:${c.verdict === "slower" ? T.slower : c.verdict === "faster" ? T.faster : T.muted};margin-left:6px">${c.verdict === "same" ? "~" : fmtPct(c.pct)}</span>`;
+    const active = m === state.metric;
+    return `<div class="t-row" style="${active ? "" : "opacity:.72"}">
+      <span class="t-key" style="background:${active ? pkgColor(s.pkg) : T.muted}"></span>
+      <span class="t-lbl">${M.label}</span>
+      <span class="t-val">${M.fmt(c.cur.med)}${d}</span></div>`;
+  }).join("");
+  const p = s.points[ri][state.metric];
+  return `<div class="t-h"><span class="t-sha">${esc(short(run.sha))}</span><span class="t-msg">${esc(firstLine(run.message))}</span></div>
+    ${rows}
+    <div class="t-foot">n=${p.n} · range ${METRICS[state.metric].fmt(p.min)} – ${METRICS[state.metric].fmt(p.max)} · ${esc(ago(run.timestamp))}</div>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Compare across packages (dumbbell on log axis)
+// ─────────────────────────────────────────────────────────────
+function renderCompare() {
+  const M = METRICS[state.metric], ri = state.head;
+  const names = new Map();
+  for (const key of state.keys) {
+    const s = state.byKey.get(key);
+    if (!s.points[ri]) continue;
+    if (!names.has(s.name)) names.set(s.name, []);
+    names.get(s.name).push(s);
+  }
+  const shared = [...names.entries()].filter(([, v]) => v.length > 1).map(([n]) => n);
+  const cats = shared.length ? shared : [...names.keys()];
+  const pkgs = state.pkgs.filter((p) => cats.some((n) => names.get(n).some((s) => s.pkg === p)));
+
+  const series = [];
+  pkgs.forEach((pkg, pi) => {
+    const color = pkgColor(pkg);
+    const off = (pi - (pkgs.length - 1) / 2) * 0.22;
+    const cur = [], prev = [], links = [];
+    cats.forEach((name, ci) => {
+      const s = names.get(name).find((x) => x.pkg === pkg);
+      if (!s) return;
+      const c = compare(s.key, state.metric, ri);
+      const y = ci + off;
+      const v = Math.max(c.cur.med, 1e-3);
+      cur.push({ value: [v, y], s, c });
+      if (c.prev) {
+        const pv = Math.max(c.prev.med, 1e-3);
+        prev.push({ value: [pv, y] });
+        links.push([[pv, y], [v, y]]);
+      }
+    });
+    series.push(
+      { type: "lines", coordinateSystem: "cartesian2d", silent: true, z: 1, polyline: false,
+        data: links.map((coords) => ({ coords })), lineStyle: { color: alpha(color, 0.5), width: 2, cap: "round" }, animation: false },
+      { type: "scatter", name: pkg + " prev", data: prev, symbolSize: 9, z: 2, silent: true,
+        itemStyle: { color: T.card, borderColor: alpha(color, 0.7), borderWidth: 1.5 } },
+      { type: "scatter", name: pkg, data: cur, clip: false, symbolSize: 12, z: 3,
+        itemStyle: { color, borderColor: T.card, borderWidth: 2, shadowBlur: 12 * T.glow, shadowColor: color },
+        emphasis: { scale: 1.35 },
+        label: { show: true, position: "right", distance: 8, color: T.ink2, fontFamily: MONO, fontSize: 11,
+          formatter: (p) => M.fmt(p.data.value[0]) },
+        animationDelay: (i) => 200 + i * 60 },
+    );
+  });
+
+  const narrow = document.getElementById("compare").clientWidth < 520;
+  const labelAt = narrow ? -0.44 : 0;
+  compareChart.setOption({
+    animationDuration: 800, animationEasing: "cubicOut", textStyle: { fontFamily: FONT },
+    grid: { left: narrow ? 16 : textWidth(cats, "11.5px " + MONO) + 24, right: 72, top: narrow ? 20 : 8, bottom: 28 },
+    xAxis: { type: "log", logBase: 10, ...baseAxis(), axisLine: { show: false },
+      axisLabel: { color: T.muted, fontFamily: MONO, fontSize: 11, hideOverlap: true,
+        // label only unit boundaries (1 ns, 1 µs, 1 ms…) so decades don't collide
+        formatter: (v) => (Math.round(Math.log10(v)) % 3 === 0 ? M.fmt(v) : "") } },
+    yAxis: { type: "value", min: -0.6, max: cats.length - 0.4, inverse: true, interval: 1, ...baseAxis(),
+      splitLine: { show: false }, axisLine: { show: false },
+      axisLabel: { color: T.ink2, fontFamily: MONO, fontSize: 11.5, inside: narrow, align: narrow ? "left" : "right",
+        customValues: cats.map((_, i) => i + labelAt), formatter: (v) => cats[Math.round(v - labelAt)] ?? "" } },
+    tooltip: {
+      ...tooltipBase(), trigger: "item",
+      formatter: (p) => {
+        if (!p.data?.s) return "";
+        const { s, c } = p.data;
+        return `<div class="t-h"><span class="t-msg">${esc(s.name)}</span></div>
+          <div class="t-row"><span class="t-key" style="background:${pkgColor(s.pkg)}"></span><span class="t-lbl">${esc(s.pkg)}</span><span class="t-val">${M.fmt(c.cur.med)}</span></div>
+          ${c.prev ? `<div class="t-row"><span class="t-key" style="background:transparent;border:1px solid ${pkgColor(s.pkg)};height:6px"></span><span class="t-lbl">previous</span><span class="t-val">${M.fmt(c.prev.med)}</span></div>` : ""}
+          <div class="t-foot">${c.verdict === "new" ? "first run for this benchmark" : c.verdict === "same" ? "within noise" : `${fmtPct(c.pct)} vs ${esc(short(state.data.runs[c.prevRun].sha))}`}</div>`;
+      },
+    },
+    series,
+  }, { notMerge: true });
+
+  compareChart.off("click");
+  compareChart.on("click", (p) => p.data?.s && select(p.data.s.key));
+
+  document.getElementById("cLegend").replaceChildren(
+    ...pkgs.map((p) => el("span", {}, el("span", { class: "lg-dot", style: `background:${pkgColor(p)};width:8px;height:8px` }), p)),
+    el("span", {}, el("span", { class: "lg-dot", style: `background:transparent;border:1.5px solid ${T.muted};width:8px;height:8px` }), "previous commit"),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Results table
+// ─────────────────────────────────────────────────────────────
+function deltaBadge(c) {
+  if (!c) return el("span", { class: "delta same" }, "—");
+  if (c.verdict === "new") return el("span", { class: "delta new" }, "new");
+  if (c.verdict === "same") return el("span", { class: "delta same", title: `${fmtPct(c.pct)}, within sample range` }, "~ " + fmtPct(c.pct));
+  return el("span", { class: `delta ${c.verdict}` }, c.verdict === "slower" ? "▲" : "▼", fmtPct(c.pct));
+}
+
+function sparkline(s, color) {
+  const W = 96, H = 22, N = 16, ns = "http://www.w3.org/2000/svg";
+  const pts = [];
+  for (let i = Math.max(0, state.head - N + 1); i <= state.head; i++) if (s.points[i]) pts.push(s.points[i][state.metric].med);
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("width", W); svg.setAttribute("height", H); svg.setAttribute("class", "spark"); svg.setAttribute("aria-hidden", "true");
+  if (pts.length < 2) return svg;
+  const lo = Math.min(...pts), hi = Math.max(...pts), span = hi - lo || 1;
+  const xy = pts.map((v, i) => [i / (pts.length - 1) * (W - 4) + 2, H - 3 - (v - lo) / span * (H - 6)]);
+  const d = xy.map(([x, y], i) => (i ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1)).join("");
+  const gid = "g" + Math.random().toString(36).slice(2);
+  svg.innerHTML = `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".3"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${d}L${xy.at(-1)[0]} ${H}L${xy[0][0]} ${H}Z" fill="url(#${gid})"/>
+    <path d="${d}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="${xy.at(-1)[0]}" cy="${xy.at(-1)[1]}" r="2.5" fill="${color}"/>`;
+  return svg;
+}
+
+function renderTable() {
+  const tbody = document.getElementById("rows"), ri = state.head;
+  const rows = [];
+  let lastPkg = null;
+  for (const key of state.keys) {
+    const s = state.byKey.get(key);
+    if (!s.points[ri]) continue;
+    if (state.query && !(s.name.toLowerCase().includes(state.query) || s.pkg.toLowerCase().includes(state.query))) continue;
+    const cs = Object.fromEntries(Object.keys(METRICS).map((m) => [m, compare(key, m, ri)]));
+    const f = state.filter || "all";
+    if (f === "changed" && !Object.values(cs).some((c) => c.verdict === "slower" || c.verdict === "faster")) continue;
+    if (f === "slower" && !Object.values(cs).some((c) => c.verdict === "slower")) continue;
+
+    const color = pkgColor(s.pkg);
+    if (s.pkg !== lastPkg) {
+      lastPkg = s.pkg;
+      rows.push(el("tr", { class: "pkg-row" }, el("td", { colspan: "8" }, el("span", { class: "dot", style: `background:${color}` }), s.pkg)));
+    }
+    const cell = (m) => {
+      const p = cs[m].cur;
+      const spread = p.med ? ((p.max - p.min) / p.med * 50) : 0;
+      return el("td", {}, el("span", { class: "num" }, METRICS[m].fmt(p.med)),
+        spread >= 0.5 ? el("span", { class: "spread" }, "±" + spread.toFixed(0) + "%") : null);
+    };
+    const tr = el("tr", {
+      class: "b", tabindex: "0", "data-key": key, "aria-selected": String(key === state.sel),
+      style: `--sel:${color}`,
+      onclick: () => select(key),
+      onkeydown: (e) => { if (e.key === "Enter") select(key); },
+    },
+      el("td", {}, el("span", { class: "bname mono" }, s.name)),
+      cell("ns"), el("td", {}, deltaBadge(cs.ns)),
+      cell("bytes"), el("td", {}, deltaBadge(cs.bytes)),
+      cell("allocs"), el("td", {}, deltaBadge(cs.allocs)),
+      el("td", {}, sparkline(s, color)));
+    rows.push(tr);
+  }
+  if (!rows.length) rows.push(el("tr", {}, el("td", { colspan: "8", style: "text-align:center;color:var(--muted);padding:28px" }, "No benchmarks match.")));
+  tbody.replaceChildren(...rows);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Change heatmap
+// ─────────────────────────────────────────────────────────────
+function renderHeat() {
+  const runs = state.data.runs, M = METRICS[state.metric];
+  const keys = state.keys;
+  const cells = [];
+  keys.forEach((key, y) => {
+    runs.forEach((_, x) => {
+      const c = compare(key, state.metric, x);
+      if (!c || c.verdict === "new") return;
+      const v = c.verdict === "same" ? 0 : Math.max(-40, Math.min(40, c.pct));
+      cells.push({ value: [x, y, v], c, key, x });
+    });
+  });
+  document.getElementById("heatDesc").textContent = `${M.label} change vs the previous commit · grey = within noise · click a cell to jump there`;
+  const narrow = document.getElementById("heat").clientWidth < 640;
+  const height = Math.max(220, keys.length * 26 + 60);
+  document.getElementById("heat").style.height = height + "px";
+  heatChart.resize();
+
+  heatChart.setOption({
+    animationDuration: 600, textStyle: { fontFamily: FONT },
+    grid: { left: 12, right: 16, top: 8, bottom: 30, containLabel: true },
+    xAxis: { type: "category", data: runs.map((r) => short(r.sha)), ...baseAxis(), axisLine: { show: false }, splitLine: { show: false },
+      axisLabel: { color: T.muted, fontFamily: MONO, fontSize: 10.5, interval: "auto", hideOverlap: true } },
+    yAxis: { type: "category", data: keys.map((k) => { const s = state.byKey.get(k); return narrow ? s.name : pkgShort(s.pkg) + " · " + s.name; }), inverse: true,
+      ...baseAxis(), axisLine: { show: false }, splitLine: { show: false },
+      axisLabel: { color: T.ink2, fontFamily: MONO, fontSize: narrow ? 10 : 11,
+        formatter: (v, i) => `${v}  {d${Math.min(state.pkgs.indexOf(state.byKey.get(keys[i]).pkg), PKG_SLOTS - 1)}|●}`,
+        rich: Object.fromEntries(T.pkg.map((c, i) => ["d" + i, { color: c, fontSize: 9 }])) } },
+    visualMap: { show: false, min: -40, max: 40, dimension: 2,
+      inRange: { color: [T.divFast, alpha(T.divFast, 0.55), T.divMid, alpha(T.divSlow, 0.55), T.divSlow] } },
+    tooltip: {
+      ...tooltipBase(), trigger: "item",
+      formatter: (p) => {
+        const { c, key, x } = p.data, s = state.byKey.get(key), run = runs[x];
+        const col = c.verdict === "slower" ? T.slower : c.verdict === "faster" ? T.faster : T.muted;
+        return `<div class="t-h"><span class="t-sha">${esc(short(run.sha))}</span><span class="t-msg">${esc(firstLine(run.message))}</span></div>
+          <div class="t-row"><span class="t-key" style="background:${pkgColor(s.pkg)}"></span><span class="t-lbl">${esc(s.pkg)} · ${esc(s.name)}</span><span class="t-val" style="color:${col}">${c.verdict === "same" ? "~" : fmtPct(c.pct)}</span></div>
+          <div class="t-foot">${M.fmt(c.prev.med)} → ${M.fmt(c.cur.med)}${c.verdict === "same" ? ` · ${fmtPct(c.pct)} within noise` : ""}</div>`;
+      },
+    },
+    series: [{
+      type: "heatmap", data: cells,
+      itemStyle: { borderColor: T.card, borderWidth: 2, borderRadius: 4 },
+      emphasis: { itemStyle: { borderColor: T.ink, borderWidth: 1.5 } },
+    }],
+  }, { notMerge: true });
+
+  // on narrow screens the map scrolls; start at the newest commits
+  const heatScroll = document.querySelector(".heat-scroll");
+  heatScroll.scrollLeft = heatScroll.scrollWidth;
+
+  heatChart.off("click");
+  heatChart.on("click", (p) => { if (p.data) { state.sel = p.data.key; setHead(p.data.x); } });
+}
+
+// ─────────────────────────────────────────────────────────────
+// State transitions, URL hash, keyboard
+// ─────────────────────────────────────────────────────────────
+function select(key) {
+  state.sel = key;
+  for (const tr of document.querySelectorAll("tr.b")) tr.setAttribute("aria-selected", String(tr.dataset.key === key));
+  renderTrend(); writeHash();
+}
+function setMetric(m) { state.metric = m; renderAll(); }
+function setHead(i) {
+  state.head = i;
+  if (!state.byKey.get(state.sel)?.points[i]) state.sel = state.keys.find((k) => state.byKey.get(k).points[i]);
+  renderAll();
+}
+function renderAll() { renderHero(); renderTrend(); renderCompare(); renderTable(); renderHeat(); writeHash(); }
+
+function writeHash() {
+  const run = state.data.runs[state.head];
+  const p = new URLSearchParams({ b: state.sel, m: state.metric });
+  if (state.head !== state.data.runs.length - 1) p.set("c", short(run.sha));
+  history.replaceState(null, "", "#" + p.toString());
+}
+function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  if (p.get("m") in METRICS) state.metric = p.get("m");
+  const c = p.get("c");
+  if (c) { const i = state.data.runs.findIndex((r) => r.sha.startsWith(c)); if (i >= 0) state.head = i; }
+  const b = p.get("b");
+  state.sel = state.byKey.get(b)?.points[state.head] ? b : null;
+  if (!state.sel) {
+    // default: the biggest regression at head, else the first storage benchmark
+    let worst = null;
+    for (const k of state.keys) { const x = compare(k, "ns", state.head); if (x?.verdict === "slower" && (!worst || x.pct > worst.pct)) worst = { k, pct: x.pct }; }
+    state.sel = worst?.k || state.keys.find((k) => state.byKey.get(k).points[state.head]);
+  }
+}
+
+document.addEventListener("keydown", (e) => {
+  if (!state.data) return;
+  const typing = e.target.matches("input, textarea");
+  if (e.key === "/" && !typing) { e.preventDefault(); document.getElementById("q").focus(); return; }
+  if (e.key === "Escape" && typing) { e.target.blur(); return; }
+  if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === "j" || e.key === "k") {
+    const rows = [...document.querySelectorAll("tr.b")];
+    const i = rows.findIndex((r) => r.dataset.key === state.sel);
+    const n = rows[Math.max(0, Math.min(rows.length - 1, i + (e.key === "j" ? 1 : -1)))];
+    if (n) select(n.dataset.key);
+  }
+  if (e.key === "h" || e.key === "l") {
+    const d = e.key === "l" ? 1 : -1, s = state.byKey.get(state.sel);
+    let i = state.head + d;
+    while (i >= 0 && i < state.data.runs.length && !s.points[i]) i += d;
+    if (i >= 0 && i < state.data.runs.length) setHead(i);
+  }
+  const m = { 1: "ns", 2: "bytes", 3: "allocs" }[e.key];
+  if (m) setMetric(m);
+  if (e.key === "t") toggleTheme();
+});
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("golphin-bench-theme", root.dataset.theme); } catch {}
+  readTokens(); renderAll();
+}
+try { const t = localStorage.getItem("golphin-bench-theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (!document.documentElement.dataset.theme && state.data) { readTokens(); renderAll(); } });
+
+// ─────────────────────────────────────────────────────────────
+// Boot
+// ─────────────────────────────────────────────────────────────
+fetch("data.json", { cache: "no-cache" })
+  .then((r) => { if (!r.ok) throw new Error(r.status + " " + r.statusText); return r.json(); })
+  .then(async (data) => {
+    if (!data.runs?.length) throw new Error("no runs recorded yet");
+    await document.fonts?.ready;
+    index(data);
+    readTokens();
+    renderShell();
+    trendChart = echarts.init(document.getElementById("trend"), null, { renderer: "canvas" });
+    compareChart = echarts.init(document.getElementById("compare"));
+    heatChart = echarts.init(document.getElementById("heat"));
+    trendChart.getZr().on("click", (e) => {
+      const [x] = trendChart.convertFromPixel({ seriesIndex: 5 }, [e.offsetX, e.offsetY]);
+      const ri = state.trendIdx?.[Math.round(x)];
+      if (ri != null && ri !== state.head) setHead(ri);
+    });
+    readHash();
+    renderAll();
+    document.getElementById("themeBtn").addEventListener("click", toggleTheme);
+    let resizeTimer, lastWidth = document.getElementById("app").clientWidth;
+    new ResizeObserver(() => {
+      trendChart.resize(); compareChart.resize(); heatChart.resize();
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        // label layout depends on width, so re-render when it actually changed
+        const w = document.getElementById("app").clientWidth;
+        if (Math.abs(w - lastWidth) > 40) { lastWidth = w; renderCompare(); renderHeat(); }
+      }, 150);
+    }).observe(document.getElementById("app"));
+  })
+  .catch((err) => {
+    document.getElementById("app").replaceChildren(
+      el("div", { class: "banner", style: "margin-top:40px" }, el("strong", {}, "Couldn't load benchmark data"), el("code", {}, String(err.message))));
+  });
+})();
+</script>
+</body>
+</html>

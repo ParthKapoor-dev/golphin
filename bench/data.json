@@ -1,0 +1,1511 @@
+{
+ "repo": "https://github.com/ParthKapoor-dev/golphin",
+ "module": "github.com/parthkapoor-dev/golphin",
+ "updated": "2026-09-13T16:03:38Z",
+ "runs": [
+  {
+   "sha": "8c138af3d2fdcf82099fe1e438cab3e2c4d70b36",
+   "message": "ci(benchmarks): track benchmarks using github-action-benchmark\n\nregular benchmarks should now be viewable from https://parthkapoor-dev.github.io/golphin/dev/bench/",
+   "author": "Parth Kapoor",
+   "timestamp": "2026-08-31T20:31:11+05:30",
+   "env": {
+    "goos": "",
+    "goarch": "",
+    "cpu": "",
+    "go": ""
+   },
+   "benchmarks": [
+    {
+     "pkg": "internal/storage",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       1030,
+       1020,
+       1007
+      ],
+      "bytes": [
+       144,
+       144,
+       144
+      ],
+      "allocs": [
+       4,
+       4,
+       4
+      ],
+      "iters": [
+       1000000,
+       1000000,
+       1000000
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       8969,
+       12315,
+       6807
+      ],
+      "bytes": [
+       736,
+       1104,
+       490
+      ],
+      "allocs": [
+       24,
+       36,
+       16
+      ],
+      "iters": [
+       132842,
+       98320,
+       177417
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "sha": "37d4addcd1385bd408096a22d952fc561945d189",
+   "message": "bench(db): reads - with \u0026 without snapshot",
+   "author": "Parth Kapoor",
+   "timestamp": "2026-08-31T21:11:34+05:30",
+   "env": {
+    "goos": "",
+    "goarch": "",
+    "cpu": "",
+    "go": ""
+   },
+   "benchmarks": [
+    {
+     "pkg": "internal/storage",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       1440,
+       1429,
+       1441
+      ],
+      "bytes": [
+       144,
+       144,
+       144
+      ],
+      "allocs": [
+       4,
+       4,
+       4
+      ],
+      "iters": [
+       843172,
+       853050,
+       794517
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       158447168,
+       160573283,
+       159996925
+      ],
+      "bytes": [
+       32551866,
+       32554332,
+       32552529
+      ],
+      "allocs": [
+       252947,
+       252960,
+       252959
+      ],
+      "iters": [
+       100,
+       100,
+       100
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       13322,
+       13309,
+       13356
+      ],
+      "bytes": [
+       1104,
+       1104,
+       1104
+      ],
+      "allocs": [
+       36,
+       36,
+       36
+      ],
+      "iters": [
+       89558,
+       89299,
+       90508
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "NoSnapshots",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       14006,
+       15957,
+       20317
+      ],
+      "bytes": [
+       624,
+       736,
+       1104
+      ],
+      "allocs": [
+       20,
+       24,
+       36
+      ],
+      "iters": [
+       82928,
+       74188,
+       60477
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "sha": "9340adfa7a256e395ca09cfa53e4238cb02ae0a0",
+   "message": "feat,tests,bench(db): get data in between keys by brute force",
+   "author": "Parth Kapoor",
+   "timestamp": "2026-09-01T19:39:03+05:30",
+   "env": {
+    "goos": "",
+    "goarch": "",
+    "cpu": "",
+    "go": ""
+   },
+   "benchmarks": [
+    {
+     "pkg": "internal/storage",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       1434,
+       1433,
+       1436
+      ],
+      "bytes": [
+       144,
+       144,
+       144
+      ],
+      "allocs": [
+       4,
+       4,
+       4
+      ],
+      "iters": [
+       843060,
+       832573,
+       787280
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       168594391,
+       171436507,
+       164522609
+      ],
+      "bytes": [
+       32551914,
+       32554308,
+       32554303
+      ],
+      "allocs": [
+       252948,
+       252960,
+       252959
+      ],
+      "iters": [
+       100,
+       100,
+       100
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       13108,
+       9623,
+       13188
+      ],
+      "bytes": [
+       1104,
+       736,
+       1104
+      ],
+      "allocs": [
+       36,
+       24,
+       36
+      ],
+      "iters": [
+       91659,
+       125112,
+       90168
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "NoSnapshots",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       12344,
+       14117,
+       14383
+      ],
+      "bytes": [
+       496,
+       608,
+       624
+      ],
+      "allocs": [
+       16,
+       20,
+       20
+      ],
+      "iters": [
+       94147,
+       83895,
+       83262
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "GetBetweenKeys",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       75940,
+       75529,
+       75333
+      ],
+      "bytes": [
+       11600,
+       11600,
+       11600
+      ],
+      "allocs": [
+       243,
+       243,
+       243
+      ],
+      "iters": [
+       15698,
+       15896,
+       15924
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "sha": "2e6e1ee95186394dc022d43c98b6a990074b6f0d",
+   "message": "refactor(db): seperating index from db",
+   "author": "Parth Kapoor",
+   "timestamp": "2026-09-03T21:41:48+05:30",
+   "env": {
+    "goos": "",
+    "goarch": "",
+    "cpu": "",
+    "go": ""
+   },
+   "benchmarks": [
+    {
+     "pkg": "internal/storage",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       804.2,
+       808.4,
+       806
+      ],
+      "bytes": [
+       144,
+       144,
+       144
+      ],
+      "allocs": [
+       4,
+       4,
+       4
+      ],
+      "iters": [
+       1492759,
+       1484847,
+       1487528
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       77498018,
+       80642409,
+       80975147
+      ],
+      "bytes": [
+       32552162,
+       32555415,
+       32555477
+      ],
+      "allocs": [
+       252949,
+       252965,
+       252966
+      ],
+      "iters": [
+       100,
+       100,
+       100
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       5291,
+       7255,
+       7775
+      ],
+      "bytes": [
+       613,
+       981,
+       1104
+      ],
+      "allocs": [
+       20,
+       32,
+       36
+      ],
+      "iters": [
+       224366,
+       165360,
+       152880
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "NoSnapshots",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       11475,
+       11253,
+       9241
+      ],
+      "bytes": [
+       992,
+       864,
+       624
+      ],
+      "allocs": [
+       32,
+       28,
+       20
+      ],
+      "iters": [
+       98709,
+       108254,
+       124251
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "GetBetweenKeys",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       41128,
+       41008,
+       40840
+      ],
+      "bytes": [
+       11600,
+       11600,
+       11600
+      ],
+      "allocs": [
+       243,
+       243,
+       243
+      ],
+      "iters": [
+       28624,
+       29154,
+       29425
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "sha": "c87d7e070c8f39b25502eb4abe2c366b521c111b",
+   "message": "tests(bst): added basic \u0026 main tests",
+   "author": "Parth Kapoor",
+   "timestamp": "2026-09-05T22:41:33+05:30",
+   "env": {
+    "goos": "",
+    "goarch": "",
+    "cpu": "",
+    "go": ""
+   },
+   "benchmarks": [
+    {
+     "pkg": "internal/storage",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       1293,
+       1318,
+       1302
+      ],
+      "bytes": [
+       144,
+       144,
+       144
+      ],
+      "allocs": [
+       4,
+       4,
+       4
+      ],
+      "iters": [
+       943320,
+       886260,
+       776145
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       115050554,
+       118118841,
+       117584343
+      ],
+      "bytes": [
+       32551862,
+       32554792,
+       32554711
+      ],
+      "allocs": [
+       252947,
+       252962,
+       252962
+      ],
+      "iters": [
+       100,
+       100,
+       100
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       8817,
+       11004,
+       11104
+      ],
+      "bytes": [
+       736,
+       981,
+       981
+      ],
+      "allocs": [
+       24,
+       32,
+       32
+      ],
+      "iters": [
+       134952,
+       107130,
+       107262
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "NoSnapshots",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       20597,
+       15854,
+       17512
+      ],
+      "bytes": [
+       1104,
+       736,
+       864
+      ],
+      "allocs": [
+       36,
+       24,
+       28
+      ],
+      "iters": [
+       57823,
+       80262,
+       71695
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "GetBetweenKeys",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       66952,
+       66894,
+       66506
+      ],
+      "bytes": [
+       11600,
+       11600,
+       11600
+      ],
+      "allocs": [
+       243,
+       243,
+       243
+      ],
+      "iters": [
+       17881,
+       18021,
+       18087
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       153.6,
+       155.4,
+       154.2
+      ],
+      "bytes": [
+       0,
+       0,
+       0
+      ],
+      "allocs": [
+       0,
+       0,
+       0
+      ],
+      "iters": [
+       7757780,
+       7734160,
+       7778163
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       24011,
+       24139,
+       24200
+      ],
+      "bytes": [
+       5569,
+       5569,
+       5569
+      ],
+      "allocs": [
+       200,
+       200,
+       200
+      ],
+      "iters": [
+       50046,
+       49648,
+       49387
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       2030,
+       2066,
+       2035
+      ],
+      "bytes": [
+       0,
+       0,
+       0
+      ],
+      "allocs": [
+       0,
+       0,
+       0
+      ],
+      "iters": [
+       569677,
+       573596,
+       583766
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "sha": "f1b982565349c74d7af6b73432bcbc4e5608476a",
+   "message": "feat(bst): add generics over key, value",
+   "author": "Parth Kapoor",
+   "timestamp": "2026-09-05T23:32:16+05:30",
+   "env": {
+    "goos": "",
+    "goarch": "",
+    "cpu": "",
+    "go": ""
+   },
+   "benchmarks": [
+    {
+     "pkg": "internal/storage",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       718.9,
+       710.2,
+       728.2
+      ],
+      "bytes": [
+       144,
+       144,
+       144
+      ],
+      "allocs": [
+       4,
+       4,
+       4
+      ],
+      "iters": [
+       1658094,
+       1691716,
+       1641698
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       86506355,
+       90265564,
+       90817450
+      ],
+      "bytes": [
+       32551942,
+       32554978,
+       32553386
+      ],
+      "allocs": [
+       252947,
+       252963,
+       252963
+      ],
+      "iters": [
+       100,
+       100,
+       100
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       5448,
+       6112,
+       4863
+      ],
+      "bytes": [
+       736,
+       858,
+       613
+      ],
+      "allocs": [
+       24,
+       28,
+       20
+      ],
+      "iters": [
+       211412,
+       194824,
+       245149
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "NoSnapshots",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       10420,
+       12750,
+       7344
+      ],
+      "bytes": [
+       864,
+       1232,
+       368
+      ],
+      "allocs": [
+       28,
+       40,
+       12
+      ],
+      "iters": [
+       114853,
+       96506,
+       165684
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "GetBetweenKeys",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       38797,
+       37767,
+       37951
+      ],
+      "bytes": [
+       11600,
+       11600,
+       11600
+      ],
+      "allocs": [
+       243,
+       243,
+       243
+      ],
+      "iters": [
+       30274,
+       31771,
+       31003
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       141.8,
+       144,
+       144.5
+      ],
+      "bytes": [
+       0,
+       0,
+       0
+      ],
+      "allocs": [
+       0,
+       0,
+       0
+      ],
+      "iters": [
+       8454140,
+       8519316,
+       8259394
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       24042,
+       24220,
+       24245
+      ],
+      "bytes": [
+       5568,
+       5568,
+       5569
+      ],
+      "allocs": [
+       200,
+       200,
+       200
+      ],
+      "iters": [
+       48618,
+       50050,
+       49896
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       1803,
+       1833,
+       1789
+      ],
+      "bytes": [
+       0,
+       0,
+       0
+      ],
+      "allocs": [
+       0,
+       0,
+       0
+      ],
+      "iters": [
+       675835,
+       642997,
+       646063
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "sha": "746b5ffe3b24edfd8182158e307c68913eb90270",
+   "message": "refactor(db): use bst for index",
+   "author": "Parth Kapoor",
+   "timestamp": "2026-09-05T23:37:46+05:30",
+   "env": {
+    "goos": "",
+    "goarch": "",
+    "cpu": "",
+    "go": ""
+   },
+   "benchmarks": [
+    {
+     "pkg": "internal/storage",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       1196,
+       1203,
+       1198
+      ],
+      "bytes": [
+       144,
+       144,
+       144
+      ],
+      "allocs": [
+       4,
+       4,
+       4
+      ],
+      "iters": [
+       1000000,
+       971882,
+       1000000
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       87800430,
+       91392238,
+       92124224
+      ],
+      "bytes": [
+       32485539,
+       32488665,
+       32488674
+      ],
+      "allocs": [
+       256032,
+       256047,
+       256047
+      ],
+      "iters": [
+       100,
+       100,
+       100
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       6375,
+       4459,
+       4495
+      ],
+      "bytes": [
+       858,
+       490,
+       490
+      ],
+      "allocs": [
+       28,
+       16,
+       16
+      ],
+      "iters": [
+       188636,
+       265698,
+       264505
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "NoSnapshots",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       10915,
+       9435,
+       11816
+      ],
+      "bytes": [
+       864,
+       624,
+       992
+      ],
+      "allocs": [
+       28,
+       20,
+       32
+      ],
+      "iters": [
+       109411,
+       129019,
+       100720
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "GetBetweenKeys",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       37429,
+       37299,
+       37250
+      ],
+      "bytes": [
+       12616,
+       12616,
+       12616
+      ],
+      "allocs": [
+       250,
+       250,
+       250
+      ],
+      "iters": [
+       31396,
+       32138,
+       31962
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       147.4,
+       146.4,
+       145.4
+      ],
+      "bytes": [
+       0,
+       0,
+       0
+      ],
+      "allocs": [
+       0,
+       0,
+       0
+      ],
+      "iters": [
+       8111744,
+       8166558,
+       8252684
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       24448,
+       24654,
+       24718
+      ],
+      "bytes": [
+       5569,
+       5569,
+       5569
+      ],
+      "allocs": [
+       200,
+       200,
+       200
+      ],
+      "iters": [
+       49141,
+       48686,
+       48684
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       1866,
+       1871,
+       1896
+      ],
+      "bytes": [
+       0,
+       0,
+       0
+      ],
+      "allocs": [
+       0,
+       0,
+       0
+      ],
+      "iters": [
+       634209,
+       629241,
+       637832
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "sha": "02cd01e82a27fa7e75a8b3275ef82e41f03f44a8",
+   "message": "ci(benchmarks): replace github-action-benchmark with own dashboard\n\n- bench2json parses `go test -bench` output into bench/data.json on gh-pages,\n  grouped by package, keeping every sample, runner cpu and failed packages;\n  imports the old dev/bench/data.js history on first run\n- dashboard (.github/bench/index.html) is a single static page on ECharts:\n  trend per benchmark, cross-package comparison, results table, change map\n- run 6 samples instead of 3, and fail the job after recording if a package\n  doesn't build instead of hiding it behind tee",
+   "author": "Parth Kapoor",
+   "timestamp": "2026-09-13T21:23:58+05:30",
+   "env": {
+    "goos": "linux",
+    "goarch": "amd64",
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "go": "go1.25.5"
+   },
+   "benchmarks": [
+    {
+     "pkg": "internal/storage",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       1048,
+       1029,
+       1035,
+       1036,
+       1026,
+       1036
+      ],
+      "bytes": [
+       144,
+       144,
+       144,
+       144,
+       144,
+       144
+      ],
+      "allocs": [
+       4,
+       4,
+       4,
+       4,
+       4,
+       4
+      ],
+      "iters": [
+       1000000,
+       1000000,
+       1000000,
+       1000000,
+       1000000,
+       1000000
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       78740371,
+       83154876,
+       83677986,
+       82729717,
+       82235492,
+       82081721
+      ],
+      "bytes": [
+       32483808,
+       32488506,
+       32488632,
+       32488663,
+       32483573,
+       32486901
+      ],
+      "allocs": [
+       256031,
+       256046,
+       256047,
+       256048,
+       256047,
+       256047
+      ],
+      "iters": [
+       100,
+       100,
+       100,
+       100,
+       100,
+       100
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       4417,
+       5042,
+       4899,
+       4762,
+       5973,
+       4873
+      ],
+      "bytes": [
+       613,
+       736,
+       736,
+       736,
+       981,
+       736
+      ],
+      "allocs": [
+       20,
+       24,
+       24,
+       24,
+       32,
+       24
+      ],
+      "iters": [
+       268802,
+       238993,
+       251620,
+       254982,
+       201246,
+       244478
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "NoSnapshots",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       8212,
+       9540,
+       9615,
+       10243,
+       9798,
+       10524
+      ],
+      "bytes": [
+       624,
+       864,
+       864,
+       992,
+       864,
+       992
+      ],
+      "allocs": [
+       20,
+       28,
+       28,
+       32,
+       28,
+       32
+      ],
+      "iters": [
+       145129,
+       128943,
+       131014,
+       119126,
+       119175,
+       112143
+      ]
+     }
+    },
+    {
+     "pkg": "internal/storage",
+     "name": "GetBetweenKeys",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       33010,
+       33267,
+       32955,
+       32923,
+       32826,
+       33519
+      ],
+      "bytes": [
+       12616,
+       12616,
+       12616,
+       12616,
+       12616,
+       12616
+      ],
+      "allocs": [
+       250,
+       250,
+       250,
+       250,
+       250,
+       250
+      ],
+      "iters": [
+       35394,
+       35894,
+       36088,
+       36333,
+       36968,
+       36052
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "GetOldest",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       133.1,
+       134.7,
+       137,
+       132,
+       135.2,
+       133.7
+      ],
+      "bytes": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "allocs": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "iters": [
+       8941008,
+       8853007,
+       8839461,
+       9058071,
+       9017174,
+       8906052
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "LargeInserts",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       22771,
+       22653,
+       22346,
+       22815,
+       22262,
+       21925
+      ],
+      "bytes": [
+       5569,
+       5568,
+       5569,
+       5568,
+       5569,
+       5569
+      ],
+      "allocs": [
+       200,
+       200,
+       200,
+       200,
+       200,
+       200
+      ],
+      "iters": [
+       51510,
+       53048,
+       53913,
+       53022,
+       53910,
+       54280
+      ]
+     }
+    },
+    {
+     "pkg": "pkg/bst",
+     "name": "RandomDataGetAndDelete",
+     "procs": 4,
+     "samples": {
+      "ns": [
+       1746,
+       1657,
+       1676,
+       1652,
+       1700,
+       1692
+      ],
+      "bytes": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "allocs": [
+       0,
+       0,
+       0,
+       0,
+       0,
+       0
+      ],
+      "iters": [
+       705650,
+       704193,
+       697128,
+       713235,
+       709276,
+       691519
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}
