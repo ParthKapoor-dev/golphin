@@ -8,6 +8,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Two quick pushes must not race each other pushing to gh-pages.
+concurrency:
+  group: benchmarks
+  cancel-in-progress: false
+
 jobs:
   benchmark:
     name: Run go benchmarks
@@ -16,6 +21,12 @@ jobs:
     steps:
       - name: check out repo
         uses: actions/checkout@v4
+
+      - name: check out gh-pages
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: pages
 
       - name: setup go env
         uses: actions/setup-go@v5
@@ -27,17 +38,37 @@ jobs:
         run: go mod download
 
       - name: Run benchmarks
-        run: go test ./... -bench=. -benchmem -count=3 -run=^$ | tee output.txt
+        id: bench
+        run: |
+          set -o pipefail
+          go test ./... -bench=. -benchmem -count=6 -run='^$' -timeout=30m | tee output.txt \
+            || echo "failed=true" >> "$GITHUB_OUTPUT"
 
-      - name: Store benchmark results
-        uses: benchmark-action/github-action-benchmark@v1
-        with:
-          name: Go Benchmarks
-          tool: go
-          output-file-path: output.txt
+      # Dashboard lives at https://<owner>.github.io/golphin/bench/
+      - name: Record run
+        run: |
+          export COMMIT_MESSAGE="$(git log -1 --format=%B)"
+          export COMMIT_AUTHOR="$(git log -1 --format=%an)"
+          export COMMIT_TIMESTAMP="$(git log -1 --format=%cI)"
+          mkdir -p pages/bench
+          go run ./.github/bench/bench2json \
+            -data pages/bench/data.json \
+            -legacy pages/dev/bench/data.js \
+            -module "$(go list -m)" \
+            -repo "${{ github.server_url }}/${{ github.repository }}" \
+            < output.txt > /dev/null
 
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          auto-push: true
+      - name: Publish dashboard
+        run: |
+          cp .github/bench/index.html pages/bench/index.html
+          cd pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bench
+          git commit -m "bench: ${GITHUB_SHA::7}" || exit 0
+          git push
 
-          # Don't fail CI for benchmark regressions yet.
-          fail-on-alert: false
+      # Results are recorded first, so a broken package still shows up on the dashboard.
+      - name: Fail if benchmarks failed
+        if: steps.bench.outputs.failed == 'true'
+        run: exit 1
