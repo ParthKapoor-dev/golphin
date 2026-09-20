@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/parthkapoor-dev/golphin/pkg/bst"
+	"github.com/parthkapoor-dev/golphin/pkg/avl"
 )
 
 // ======================================================
@@ -62,11 +62,11 @@ func (loc *location) encodeIdx() []byte {
 // ======================================================
 
 type index struct {
-	bst *bst.BST[string, *location]
+	bst *avl.BST[string, *location]
 }
 
 func NewIndex() index {
-	b := bst.NewBst[string, *location]()
+	b := avl.NewBst[string, *location]()
 	return index{b}
 }
 

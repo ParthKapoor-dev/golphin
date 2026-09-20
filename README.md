@@ -53,6 +53,6 @@ since this is not sorted we are now introducing Binary Search Trees
 ## References
 1. https://www.nan.fyi/database
 2. https://github.com/golang-standards/project-layout
-3. https://github.com/egregors/sortedmap
+3. 3. https://github.com/egregors/sortedmap
 
 :love: from [parthkapoor](https://parthkapoor.me)

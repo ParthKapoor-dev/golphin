@@ -1,4 +1,4 @@
-package bst
+package avl
 
 import (
 	"cmp"
@@ -22,63 +22,42 @@ func (bst *BST[K, V]) Find(key K) (bool, V, error) {
 		return false, res, nil
 	}
 
-	n := bst.root.dfs(key)
-	if n == nil {
+	node := bst.root.dfs(key)
+	if node == nil {
 		return false, res, nil
 	}
 
-	return true, n.info, nil
+	return true, node.value, nil
 }
 
 func (bst *BST[K, V]) Upsert(key K, value V) error {
 
-	new := newNode(key, value)
+	isInsert := true
 
 	if bst.root == nil {
-		bst.root = new
-		return nil
+		bst.root = newNode(key, value)
+	} else {
+		bst.root, isInsert = bst.root.upsert(key, value)
 	}
 
-	nearest := bst.root.dfsNearest(new.key)
-	if nearest == nil {
-		return fmt.Errorf("nearest came back null")
+	if isInsert {
+		bst.Size++
 	}
-
-	// update path
-	if nearest.key == key {
-		nearest.info = value
-		return nil
-	}
-
-	// insertion path
-	if err := nearest.add(new); err != nil {
-		return err
-	}
-
-	bst.Size++
 
 	return nil
 }
 
 func (bst *BST[K, V]) Delete(key K) error {
-
-	if bst.root.key == key {
-		if bst.root.left == nil {
-			bst.root = bst.root.right
-
-			bst.Size--
-			return nil
-		}
-		if bst.root.right == nil {
-			bst.root = bst.root.left
-
-			bst.Size--
-			return nil
-		}
+	if bst.root == nil {
+		return fmt.Errorf("no root exists")
 	}
 
-	if err := bst.root.delete(nil, key); err != nil {
-		return err
+	isDeleted := false
+
+	bst.root, isDeleted = bst.root.delete(key)
+
+	if isDeleted == false {
+		return fmt.Errorf("invalid key")
 	}
 
 	bst.Size--

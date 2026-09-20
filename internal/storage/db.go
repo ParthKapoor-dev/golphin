@@ -259,8 +259,6 @@ func (db *Db) GetInBetweenKeys(fromKey string, toKey string) ([]string, error) {
 		results = append(results, value)
 	}
 
-	slices.Sort(results)
-
 	return results, nil
 }
 
