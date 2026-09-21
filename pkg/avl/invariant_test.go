@@ -75,8 +75,8 @@ func checkInvariants[K cmp.Ordered, V any](t *testing.T, tr *BST[K, V], wantSize
 	if count != wantSize {
 		t.Errorf("tree holds %d nodes, want %d", count, wantSize)
 	}
-	if tr.Size != wantSize {
-		t.Errorf("Size = %d, but tree holds %d nodes", tr.Size, wantSize)
+	if tr.Len() != wantSize {
+		t.Errorf("Size = %d, but tree holds %d nodes", tr.Len(), wantSize)
 	}
 
 	if wantSize > 0 {

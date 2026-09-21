@@ -7,7 +7,7 @@ import (
 
 type BST[K cmp.Ordered, V any] struct {
 	root *node[K, V]
-	Size int
+	size int
 }
 
 func NewBst[K cmp.Ordered, V any]() *BST[K, V] {
@@ -55,7 +55,7 @@ func (bst *BST[K, V]) Upsert(key K, value V) error {
 		return err
 	}
 
-	bst.Size++
+	bst.size++
 
 	return nil
 }
@@ -66,13 +66,13 @@ func (bst *BST[K, V]) Delete(key K) error {
 		if bst.root.left == nil {
 			bst.root = bst.root.right
 
-			bst.Size--
+			bst.size--
 			return nil
 		}
 		if bst.root.right == nil {
 			bst.root = bst.root.left
 
-			bst.Size--
+			bst.size--
 			return nil
 		}
 	}
@@ -81,7 +81,7 @@ func (bst *BST[K, V]) Delete(key K) error {
 		return err
 	}
 
-	bst.Size--
+	bst.size--
 
 	return nil
 }
@@ -109,4 +109,9 @@ func (bst *BST[K, V]) Iter() ([]V, error) {
 	}
 
 	return bst.root.iter(results), nil
+}
+
+func (bst *BST[K, V]) Len() int {
+
+	return bst.size
 }

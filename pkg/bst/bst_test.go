@@ -83,7 +83,7 @@ func randomDataValidation(t testingCtx, tr *bst.BST[string, string], cache map[s
 		}
 	}
 
-	if tr.Size > len(cache)+1 {
+	if tr.Len() > len(cache)+1 {
 		t.Fatalf("compaction failed!")
 	}
 

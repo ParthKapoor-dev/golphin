@@ -16,9 +16,6 @@ func newNode[K cmp.Ordered, V any](key K, info V) *node[K, V] {
 	return &node[K, V]{key, info, 1, nil, nil}
 }
 
-// bf reports the balance factor as right height minus left height, so a
-// negative value means left-heavy and a positive value means right-heavy.
-// (Many texts use the opposite sign; rotate() is written to match this one.)
 func (n *node[K, V]) bf() int {
 	ans := 0
 

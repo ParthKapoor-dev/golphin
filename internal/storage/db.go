@@ -168,13 +168,15 @@ func GetDB(dirPath string, maxRecordsPerSegment int) (*Db, error) {
 	return db, nil
 }
 
-// TODO: (HIGH) THIS IS WRONG.
 func (db *Db) GetSize() (int, error) {
-	var count = 0
-	for _, seg := range db.segments {
-		count += seg.Count
-	}
-	return count, nil
+
+	return db.cache.size(), nil
+
+	// var count = 0
+	// for _, seg := range db.segments {
+	// 	count += seg.Count
+	// }
+	// return count, nil
 }
 
 func (db *Db) Get(key string) (bool, string, error) {

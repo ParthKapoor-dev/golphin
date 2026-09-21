@@ -1,11 +1,13 @@
 package storage
 
 import (
+	"cmp"
 	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/parthkapoor-dev/golphin/pkg/avl"
+	"github.com/parthkapoor-dev/golphin/pkg/bst"
 )
 
 // ======================================================
@@ -61,8 +63,22 @@ func (loc *location) encodeIdx() []byte {
 // INDEX STORE
 // ======================================================
 
+var (
+	_ orderedMap[string, *location] = (*avl.BST[string, *location])(nil)
+	_ orderedMap[string, *location] = (*bst.BST[string, *location])(nil)
+)
+
+type orderedMap[K cmp.Ordered, V any] interface {
+	Find(key K) (bool, V, error)
+	Upsert(key K, loc V) error
+	Delete(key K) error
+	FindBetween(lo K, hi K) ([]V, error)
+	Iter() ([]V, error)
+	Len() int
+}
+
 type index struct {
-	bst *avl.BST[string, *location]
+	tree orderedMap[string, *location]
 }
 
 func NewIndex() index {
@@ -71,21 +87,25 @@ func NewIndex() index {
 }
 
 func (idx index) get(key string) (bool, *location, error) {
-	return idx.bst.Find(key)
+	return idx.tree.Find(key)
 }
 
 func (idx index) set(key string, loc *location) error {
-	return idx.bst.Upsert(key, loc)
+	return idx.tree.Upsert(key, loc)
 }
 
 func (idx index) delete(key string) error {
-	return idx.bst.Delete(key)
+	return idx.tree.Delete(key)
 }
 
 func (idx index) between(from string, to string) ([]*location, error) {
-	return idx.bst.FindBetween(from, to)
+	return idx.tree.FindBetween(from, to)
 }
 
 func (idx index) iter() ([]*location, error) {
-	return idx.bst.Iter()
+	return idx.tree.Iter()
+}
+
+func (idx index) size() int {
+	return idx.tree.Len()
 }
